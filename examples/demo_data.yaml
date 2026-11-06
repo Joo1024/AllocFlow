@@ -1,0 +1,18 @@
+# Explicit named configuration; edit values here, not in the engine.
+schema_version: '1'
+start: '2020-01-02'
+end: '2023-12-29'
+base_currency: USD
+seed: 20261106
+initial_price: '100'
+initial_fx:
+  USD: '1'
+  CNY: '0.142857142857142857'
+  EUR: '1.1'
+annual_return: '0.05'
+annual_volatility: '0.14'
+fx_annual_volatility: '0.04'
+shock_date: '2022-03-01'
+shock_fraction: '-0.30'
+periods_per_year: '252'
+common_factor_loading: '0.8'

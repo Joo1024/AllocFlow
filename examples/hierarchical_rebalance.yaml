@@ -1,0 +1,376 @@
+# Explicit named configuration; edit values here, not in the engine.
+schema_version: '1'
+name: 分层再平衡
+start: '2021-01-04'
+end: '2023-12-29'
+report_currency: CNY
+decision_calendar: XNYS
+instruments:
+- id: VGT
+  symbol: VGT
+  kind: etf
+  currency: USD
+  calendar: XNYS
+  price_mode: provider_adjusted_synthetic
+  quantity_step: '0.000001'
+  execution_delay_sessions: 0
+  pricing: session_close
+- id: VOO
+  symbol: VOO
+  kind: etf
+  currency: USD
+  calendar: XNYS
+  price_mode: provider_adjusted_synthetic
+  quantity_step: '0.000001'
+  execution_delay_sessions: 0
+  pricing: session_close
+- id: VTV
+  symbol: VTV
+  kind: etf
+  currency: USD
+  calendar: XNYS
+  price_mode: provider_adjusted_synthetic
+  quantity_step: '0.000001'
+  execution_delay_sessions: 0
+  pricing: session_close
+- id: VO
+  symbol: VO
+  kind: etf
+  currency: USD
+  calendar: XNYS
+  price_mode: provider_adjusted_synthetic
+  quantity_step: '0.000001'
+  execution_delay_sessions: 0
+  pricing: session_close
+- id: VB
+  symbol: VB
+  kind: etf
+  currency: USD
+  calendar: XNYS
+  price_mode: provider_adjusted_synthetic
+  quantity_step: '0.000001'
+  execution_delay_sessions: 0
+  pricing: session_close
+- id: VXUS
+  symbol: VXUS
+  kind: etf
+  currency: USD
+  calendar: XNYS
+  price_mode: provider_adjusted_synthetic
+  quantity_step: '0.000001'
+  execution_delay_sessions: 0
+  pricing: session_close
+- id: BND
+  symbol: BND
+  kind: etf
+  currency: USD
+  calendar: XNYS
+  price_mode: provider_adjusted_synthetic
+  quantity_step: '0.000001'
+  execution_delay_sessions: 0
+  pricing: session_close
+- id: BNDX
+  symbol: BNDX
+  kind: etf
+  currency: USD
+  calendar: XNYS
+  price_mode: provider_adjusted_synthetic
+  quantity_step: '0.000001'
+  execution_delay_sessions: 0
+  pricing: session_close
+- id: SGOV
+  symbol: SGOV
+  kind: cash_equivalent
+  currency: USD
+  calendar: XNYS
+  price_mode: provider_adjusted_synthetic
+  quantity_step: '0.000001'
+  execution_delay_sessions: 0
+  pricing: session_close
+allocation:
+  id: portfolio
+  weight: '1'
+  instrument: null
+  children:
+  - id: stocks
+    weight: '0.60'
+    instrument: null
+    children:
+    - id: target_VGT
+      weight: '0.21'
+      instrument: VGT
+      children: []
+    - id: target_VOO
+      weight: '0.21'
+      instrument: VOO
+      children: []
+    - id: target_VTV
+      weight: '0.0933'
+      instrument: VTV
+      children: []
+    - id: target_VO
+      weight: '0.0933'
+      instrument: VO
+      children: []
+    - id: target_VB
+      weight: '0.0934'
+      instrument: VB
+      children: []
+    - id: target_VXUS
+      weight: '0.30'
+      instrument: VXUS
+      children: []
+  - id: non_stock
+    weight: '0.40'
+    instrument: null
+    children:
+    - id: bonds
+      weight: '0.60'
+      instrument: null
+      children:
+      - id: target_BND
+        weight: '0.70'
+        instrument: BND
+        children: []
+      - id: target_BNDX
+        weight: '0.30'
+        instrument: BNDX
+        children: []
+    - id: cash_equivalents
+      weight: '0.40'
+      instrument: null
+      children:
+      - id: target_SGOV
+        weight: '1'
+        instrument: SGOV
+        children: []
+groups:
+- id: stocks
+  instruments:
+  - VGT
+  - VOO
+  - VTV
+  - VO
+  - VB
+  - VXUS
+- id: non_tech
+  instruments:
+  - VOO
+  - VTV
+  - VO
+  - VB
+  - VXUS
+- id: bonds
+  instruments:
+  - BND
+  - BNDX
+- id: cash_equivalents
+  instruments:
+  - SGOV
+budgets:
+- id: stock_dca
+  currency: USD
+  allocation_node: stocks
+  annual_interest_rate: '0'
+- id: stock_dip
+  currency: USD
+  allocation_node: stocks
+  annual_interest_rate: '0'
+- id: bonds
+  currency: USD
+  allocation_node: bonds
+  annual_interest_rate: '0'
+- id: cash_equiv
+  currency: USD
+  allocation_node: cash_equivalents
+  annual_interest_rate: '0'
+cashflows:
+- id: initial
+  direction: deposit
+  frequency: once
+  start: '2021-01-04'
+  end: '2021-01-04'
+  money:
+    amount: '100000'
+    currency: CNY
+  annual_growth: '0'
+  paused_months: []
+  distributions:
+  - budget: stock_dca
+    weight: '0.60'
+  - budget: bonds
+    weight: '0.24'
+  - budget: cash_equiv
+    weight: '0.16'
+- id: monthly
+  direction: deposit
+  frequency: monthly
+  start: '2021-02-01'
+  end: '2023-12-29'
+  money:
+    amount: '10000'
+    currency: CNY
+  annual_growth: '0'
+  paused_months: []
+  distributions:
+  - budget: stock_dca
+    weight: '0.42'
+  - budget: stock_dip
+    weight: '0.18'
+  - budget: bonds
+    weight: '0.24'
+  - budget: cash_equiv
+    weight: '0.16'
+rules:
+- id: initial_stocks
+  kind: invest
+  schedule: initial
+  source_budget: stock_dca
+  trigger:
+    kind: always
+  selector:
+    group: stocks
+    method: proportional
+    max_assets: null
+  sizer:
+    fraction: '1'
+    minimum_budget: '0'
+- id: initial_bonds
+  kind: invest
+  schedule: initial
+  source_budget: bonds
+  trigger:
+    kind: always
+  selector:
+    group: bonds
+    method: proportional
+    max_assets: null
+  sizer:
+    fraction: '1'
+    minimum_budget: '0'
+- id: initial_sgov
+  kind: invest
+  schedule: initial
+  source_budget: cash_equiv
+  trigger:
+    kind: always
+  selector:
+    group: cash_equivalents
+    method: proportional
+    max_assets: null
+  sizer:
+    fraction: '1'
+    minimum_budget: '0'
+- id: dip_cap
+  kind: budget_cap
+  schedule: monthly
+  source_budget: stock_dip
+  destination_budget: stock_dca
+  inflow_reference: monthly
+  multiple: '12'
+- id: dip_buy
+  kind: invest
+  schedule: monthly
+  source_budget: stock_dip
+  trigger:
+    kind: drawdown
+    instrument: VOO
+    lookback_sessions: null
+    rearm: monthly
+    tiers:
+    - threshold: '0.10'
+      fraction: '0.20'
+    - threshold: '0.20'
+      fraction: '0.40'
+    - threshold: '0.30'
+      fraction: '0.40'
+  selector:
+    group: non_tech
+    method: underweight
+    max_assets: 2
+  sizer:
+    fraction: '1'
+    minimum_budget: '500'
+- id: monthly_stocks
+  kind: invest
+  schedule: monthly
+  source_budget: stock_dca
+  trigger:
+    kind: always
+  selector:
+    group: stocks
+    method: proportional
+    max_assets: null
+  sizer:
+    fraction: '1'
+    minimum_budget: '0'
+- id: monthly_bonds
+  kind: invest
+  schedule: monthly
+  source_budget: bonds
+  trigger:
+    kind: always
+  selector:
+    group: bonds
+    method: proportional
+    max_assets: null
+  sizer:
+    fraction: '1'
+    minimum_budget: '0'
+- id: monthly_sgov
+  kind: invest
+  schedule: monthly
+  source_budget: cash_equiv
+  trigger:
+    kind: always
+  selector:
+    group: cash_equivalents
+    method: proportional
+    max_assets: null
+  sizer:
+    fraction: '1'
+    minimum_budget: '0'
+- id: stock_rebalance
+  kind: rebalance
+  schedule: monthly
+  target_node: stocks
+  cash_budgets: &id001
+  - stock_dca
+  - bonds
+  - cash_equiv
+  proceeds_budget: stock_dca
+  weight_basis: budget_inclusive
+  threshold_mode: absolute
+  threshold: '0.02'
+  minimum_trade: '20'
+- id: monthly_rebalance
+  kind: rebalance
+  schedule: monthly
+  target_node: portfolio
+  cash_budgets: *id001
+  proceeds_budget: stock_dca
+  weight_basis: budget_inclusive
+  threshold_mode: absolute
+  threshold: '0.05'
+  minimum_trade: '20'
+withdrawal: null
+execution:
+  fee:
+    model: fixed_plus_proportional
+    fixed: '1'
+    fixed_currency: USD
+    proportional: '0'
+  cash_step: '0.000001'
+  fx_spread: '0'
+  max_stale_days: 10
+  interest_day_count: ACT/365F
+analysis:
+  frequency: monthly
+  periods_per_year: '12'
+  risk_free_annual: '0'
+  xirr_lower: '-0.999'
+  xirr_upper: '10'
+  xirr_grid_size: 500
+  xirr_day_count: ACT/365F
+  xirr_root_tolerance: '0.0000001'
+  xirr_npv_tolerance: '0.0000001'
