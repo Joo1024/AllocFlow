@@ -1,0 +1,19 @@
+# Explicit named configuration; edit values here, not in the engine.
+schema_version: '1'
+method: fixed_shock
+training_start: '2020-01-02'
+training_end: '2020-12-31'
+paths: 1
+root_seed: 20261106
+block_sessions: 20
+workers: 1
+shock_date: '2022-03-01'
+asset_shocks:
+  VGT: '-0.50'
+  VOO: '-0.40'
+  VTV: '-0.30'
+  VO: '-0.40'
+  VB: '-0.45'
+  VXUS: '-0.35'
+fx_shocks:
+  CNY: '0.10'

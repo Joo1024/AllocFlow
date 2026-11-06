@@ -1,0 +1,52 @@
+# Explicit named configuration; edit values here, not in the engine.
+schema_version: '1'
+start: '2020-01-02'
+end: '2023-12-29'
+base_currency: USD
+timeout_seconds: '30'
+retry_attempts: 3
+retry_wait_seconds: '2'
+prices:
+- instrument: VGT
+  provider: yfinance
+  symbol: VGT
+  adjustment: auto_adjust
+- instrument: VOO
+  provider: yfinance
+  symbol: VOO
+  adjustment: auto_adjust
+- instrument: VTV
+  provider: yfinance
+  symbol: VTV
+  adjustment: auto_adjust
+- instrument: VO
+  provider: yfinance
+  symbol: VO
+  adjustment: auto_adjust
+- instrument: VB
+  provider: yfinance
+  symbol: VB
+  adjustment: auto_adjust
+- instrument: VXUS
+  provider: yfinance
+  symbol: VXUS
+  adjustment: auto_adjust
+- instrument: BND
+  provider: yfinance
+  symbol: BND
+  adjustment: auto_adjust
+- instrument: BNDX
+  provider: yfinance
+  symbol: BNDX
+  adjustment: auto_adjust
+- instrument: SGOV
+  provider: yfinance
+  symbol: SGOV
+  adjustment: auto_adjust
+fx:
+- currency: CNY
+  symbol: CNY=X
+  invert: true
+- currency: EUR
+  symbol: EURUSD=X
+  invert: false
