@@ -8,11 +8,16 @@ No financial defaults may be scattered through the engine. Model contracts prece
 
 ## Milestones
 
-- [ ] Plan, public models, financial contracts and independent acceptance cases.
-- [ ] Ledger, execution, budget conservation and cash-flow-neutral unit NAV.
-- [ ] Fixed datasets, multi-currency, configurable policies and six templates.
-- [ ] Metrics, attribution, comparisons, stress and joint sampled scenarios.
-- [ ] SDK, CLI, local Web, event explanations and exports.
-- [ ] Clean-install verification, documentation and reviewable draft PR.
+- [x] Plan, public models, financial contracts and independent acceptance cases.
+- [x] Ledger, execution, budget conservation and cash-flow-neutral unit NAV.
+- [x] Fixed datasets, multi-currency, configurable policies and six templates.
+- [x] Metrics, attribution, comparisons, stress and joint sampled scenarios.
+- [x] SDK, CLI, local Web, event explanations and exports.
+- [x] Clean-install verification, documentation and reviewable draft PR.
 
 Main contains only the initial project description until user review and acceptance.
+
+## Review gate
+
+Implementation is a developer preview. User acceptance and merge into main remain pending.
+See docs/REVIEW.md for approximation boundaries and validation evidence.

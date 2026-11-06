@@ -1,0 +1,17 @@
+name: checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: '0.13.5'
+      - run: uv sync --locked --extra web --extra scenarios --extra providers --group dev
+      - run: uv run ruff check src tests examples/custom_strategy.py
+      - run: uv run ruff format --check src tests examples/custom_strategy.py
+      - run: uv run mypy
+      - run: uv run pytest
