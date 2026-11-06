@@ -47,3 +47,6 @@ python_version = "3.12"
 files = ["src/allocflow/domain", "src/allocflow/config", "src/allocflow/policies/base.py"]
 ignore_missing_imports = true
 check_untyped_defs = true
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/docs", "/examples", "/README.md", "/pyproject.toml", "/uv.lock"]
