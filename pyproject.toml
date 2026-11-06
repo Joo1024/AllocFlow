@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "allocflow"
+version = "0.1.0"
+description = "面向长期投资的现金流与资产配置模拟器"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "pydantic>=2.12,<3", "PyYAML>=6,<7", "numpy>=2,<3", "pandas==2.3.3",
+  "pandera[pandas]>=0.26,<0.36", "pyarrow>=20,<27",
+  "exchange-calendars==4.13.2", "typer>=0.16,<1",
+  "scipy>=1.15,<2", "pyxirr>=0.10.8,<0.11", "empyrical-reloaded==0.7.2",
+]
+
+[project.optional-dependencies]
+web = ["streamlit>=1.45,<2", "plotly>=6,<8", "Jinja2>=3.1,<4"]
+providers = ["yfinance>=1.8,<2", "akshare>=1.18,<2", "requests>=2.32,<3", "tenacity>=9,<10"]
+scenarios = ["arch>=8,<9", "joblib>=1.5,<2"]
+research = ["skfolio>=1,<2", "optuna>=4,<6", "duckdb>=1,<3"]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "hypothesis>=6,<7", "ruff>=0.14", "mypy>=1.15", "types-PyYAML"]
+
+[project.scripts]
+allocflow = "allocflow.interfaces.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/allocflow"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src/allocflow/domain", "src/allocflow/config", "src/allocflow/policies/base.py"]
+ignore_missing_imports = true
+check_untyped_defs = true
