@@ -64,6 +64,8 @@ def withdraw(book, execution, flow, day):
     policy = book.plan.withdrawal
     if policy is None:
         raise ValueError("withdrawal policy missing")
+    if policy.amount_basis == "portfolio_fraction":
+        requested = book.value(day)[0] * policy.fraction / book.fx(flow.money.currency, day)
     trial = deepcopy(book.state)
     work = Book(book.plan, book.market, trial)
     remaining = requested

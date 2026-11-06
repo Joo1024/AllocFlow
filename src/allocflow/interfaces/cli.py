@@ -160,3 +160,22 @@ def web():
 
     path = Path(__file__).with_name("web.py")
     raise typer.Exit(subprocess.call([sys.executable, "-m", "streamlit", "run", str(path)]))
+
+
+@app.command()
+@errors
+def resume(
+    plan: Annotated[Path, typer.Option(exists=True)],
+    dataset: Annotated[Path, typer.Option(exists=True)],
+    checkpoint: Annotated[Path, typer.Option(exists=True)],
+    output: Annotated[Path, typer.Option()],
+    html: Annotated[bool, typer.Option("--html/--no-html")],
+):
+    from allocflow.application.checkpoints import load_checkpoint
+    from allocflow.application.service import run_plan
+    from allocflow.reporting.export import export_run
+
+    spec = load_plan(plan)
+    result = run_plan(spec, dataset, initial_state=load_checkpoint(checkpoint, spec))
+    export_run(result, output, html=html)
+    typer.echo(json_text({"status": "complete", "output": str(output), "metrics": result.metrics}))

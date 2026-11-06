@@ -120,6 +120,15 @@ class PlanSpec(Spec):
                 raise ValueError(f"unknown budget in rule {rule.id}")
         if self.withdrawal:
             w = self.withdrawal
+            if w.amount_basis == "portfolio_fraction":
+                if any(
+                    f.money.amount != 0 or f.annual_growth != 0
+                    for f in self.cashflows
+                    if f.direction == "withdrawal"
+                ):
+                    raise ValueError(
+                        "fraction withdrawals require zero fixed amount and zero annual growth"
+                    )
             if w.proceeds_budget not in w.cash_budgets or len(set(w.cash_budgets)) != len(
                 w.cash_budgets
             ):

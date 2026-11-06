@@ -53,6 +53,11 @@ class StrategyRegistry:
             raise ValueError(f"strategy already registered: {name}")
         self._entries[name] = (strategy, parameter_model)
 
+    def validate(self, name: str, parameters: dict) -> Spec:
+        if name not in self._entries:
+            raise ValueError(f"unregistered strategy: {name}")
+        return self._entries[name][1].model_validate(parameters)
+
     def evaluate(self, name: str, context: PolicyContext, parameters: dict) -> Decision:
         if name not in self._entries:
             raise ValueError(

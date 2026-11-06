@@ -283,6 +283,8 @@ withdrawal:
   - VB
   proceeds_budget: cash_equiv
   shortfall: partial
+  amount_basis: fixed
+  fraction: null
 execution:
   fee:
     model: fixed_plus_proportional

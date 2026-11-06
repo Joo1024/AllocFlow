@@ -28,6 +28,8 @@ def withdrawal_plan(plan, shortfall, amount):
         sell_order=[i.id for i in plan.instruments],
         proceeds_budget="stock_dca",
         shortfall=shortfall,
+        amount_basis="fixed",
+        fraction=None,
     )
     return PlanSpec.model_validate(raw)
 

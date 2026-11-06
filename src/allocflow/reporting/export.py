@@ -31,6 +31,11 @@ def export_run(result, output, *, html=True):
     output.mkdir(parents=True, exist_ok=False)
     marker = output / ".incomplete"
     marker.touch()
+    from allocflow.application.checkpoints import checkpoint_document
+
+    (output / "checkpoint.json").write_text(
+        json_text(checkpoint_document(result), indent=2), encoding="utf-8"
+    )
     (output / "manifest.json").write_text(json_text(result.manifest, indent=2), encoding="utf-8")
     (output / "metrics.json").write_text(json_text(result.metrics, indent=2), encoding="utf-8")
     (output / "events.json").write_text(

@@ -72,3 +72,22 @@ uv run mypy
 原价与公司行动完整处理暂未实现。skfolio/Optuna/DuckDB仅保留可选依赖分组，未接入普通运行。
 
 [Goal](docs/GOAL.md) · [设计](docs/DESIGN.md) · [检查与验证](docs/REVIEW.md)
+
+## 从文件续跑与比例提款
+
+运行包包含 `checkpoint.json`。将后续计划的 start 设置为检查点日期之后，并使用覆盖前后区间的数据集：
+
+```bash
+uv run allocflow resume --plan continuation.yaml --dataset work/demo-market --checkpoint runs/first/checkpoint.json --output runs/continued --html
+```
+
+SDK：`from allocflow.application.checkpoints import load_checkpoint`，然后把
+`load_checkpoint(path, plan)` 返回值传入 `run_plan(..., initial_state=state)`。
+账户/币种契约必须一致。恢复后指标中的TWR针对续跑窗口，XIRR仍使用保存的投资人现金流历史。
+
+提款政策新增必填 `amount_basis` 和 `fraction`：固定金额使用 `fixed`、`null`；
+按账户余额提款使用 `portfolio_fraction` 和显式比例，例如 `'0.04'`。
+比例模式对应现金流的固定金额与 annual_growth 必须填0。
+
+完整开发测试环境包含providers：
+`uv sync --locked --extra web --extra scenarios --extra providers --group dev`。

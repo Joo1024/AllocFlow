@@ -45,3 +45,12 @@ class WithdrawalSpec(Spec):
     sell_order: tuple[Identifier, ...]
     proceeds_budget: Identifier
     shortfall: Literal["partial", "reject"]
+
+    amount_basis: Literal["fixed", "portfolio_fraction"]
+    fraction: Fraction | None
+
+    @model_validator(mode="after")
+    def validate_basis(self):
+        if (self.amount_basis == "portfolio_fraction") != (self.fraction is not None):
+            raise ValueError("portfolio_fraction requires fraction; fixed requires null fraction")
+        return self

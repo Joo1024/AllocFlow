@@ -47,6 +47,9 @@ def run_plan(plan, dataset, *, strategies=None, execution=None, initial_state=No
         market.price(instrument.id, plan.start, visible=instrument.pricing == "available_nav")
         market.price(instrument.id, plan.end, visible=instrument.pricing == "available_nav")
     registry = strategies if strategies is not None else StrategyRegistry()
+    for rule in plan.rules:
+        if rule.kind == "custom":
+            registry.validate(rule.strategy, rule.parameters)
     values, state = simulate(
         plan,
         market,

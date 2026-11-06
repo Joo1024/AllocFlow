@@ -97,3 +97,16 @@ MarketDataset、ExecutionModel、策略、结果投影均有明确类型；更�
 
 提款在卖出费用计入净值后赎回份额；清空账户保留最后有效净值作为下一次投入锚点。
 延迟订单锁定现金或库存；延迟资产不可用于当天提款，须提前卖出。
+
+## 比例提款与文件恢复
+
+WithdrawalSpec.amount_basis 必填：fixed 使用现金流固定金额；portfolio_fraction 使用
+fraction × 提款前账户价值。fraction 在 fixed 模式必须显式为 null；比例模式的固定金额和
+annual_growth 必须为0，避免相互矛盾的输入。现金流币种只决定请求支付的币种。
+
+运行包新增 checkpoint.json，含版本、账户契约、状态及 SHA256。load_checkpoint(path, plan)
+验证报告币种、预算币种、资产币种与份额步长，再恢复Decimal、日期、订单、事件和规则状态。
+续跑起点必须晚于检查点；允许显式调整后续规则，不能静默更换账户币种。
+SHA256用于发现意外修改，不作为数字签名或来源认证。
+
+自定义策略在引擎执行任何现金流或订单前检查登记名与参数模型。
