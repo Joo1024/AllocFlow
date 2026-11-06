@@ -12,6 +12,15 @@ jobs:
           version: '0.13.5'
       - run: uv sync --locked --extra web --extra scenarios --extra providers --group dev
       - run: uv run ruff check src tests examples/custom_strategy.py
-      - run: uv run ruff format --check src tests examples/custom_strategy.py
+      - run: uv run ruff format --check --diff src tests examples/custom_strategy.py
+        if: always()
       - run: uv run mypy
+        if: always()
       - run: uv run pytest
+        if: always()
+      - name: Formatting diagnostics
+        if: failure()
+        run: |
+          uv run ruff check --fix src tests examples/custom_strategy.py || true
+          uv run ruff format src tests examples/custom_strategy.py
+          git diff -- src tests examples/custom_strategy.py

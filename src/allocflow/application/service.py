@@ -2,7 +2,6 @@ import hashlib
 import importlib.metadata
 import platform
 import subprocess
-from copy import copy
 from dataclasses import asdict
 from pathlib import Path
 
@@ -41,8 +40,7 @@ def run_plan(plan, dataset, *, strategies=None, execution=None, initial_state=No
         if isinstance(dataset, (str, Path))
         else dataset
     )
-    market = copy(market)
-    market.max_stale_days = plan.execution.max_stale_days
+    market = market.with_staleness_policy(plan.execution.max_stale_days)
     from allocflow.adapters.quality import inspect_dataset
 
     quality = inspect_dataset(plan, market)
@@ -93,7 +91,7 @@ def run_plan(plan, dataset, *, strategies=None, execution=None, initial_state=No
         "initial_state_supplied": initial_state is not None,
         "initial_state": asdict(initial_state) if initial_state is not None else None,
     }
-    metrics = compute_metrics(values, state, plan.analysis)
+    metrics = compute_metrics(values, state, plan.analysis, initial_state=initial_state)
     result = RunResult(
         plan.name,
         plan.report_currency,
@@ -108,7 +106,7 @@ def run_plan(plan, dataset, *, strategies=None, execution=None, initial_state=No
     from allocflow.analysis.planning import planning_outcomes
 
     result.manifest["planning_outcomes"] = planning_outcomes(result)
-    result.dataset_artifacts = getattr(market, "artifacts", {})
+    result.dataset_artifacts = dict(market.export_artifacts())
     result.manifest["dataset_bundled"] = bool(result.dataset_artifacts)
     return result
 
@@ -125,12 +123,17 @@ def compare_plans(plans, dataset, *, require_same_cashflows=True):
         ):
             raise ValueError("comparison requires identical interval and report currency")
         if require_same_cashflows:
+            from allocflow.application.cashflow_contract import cashflow_contract
 
-            def external_schedule(p):
-                return [f.model_dump(mode="json", exclude={"distributions"}) for f in p.cashflows]
-
-            if external_schedule(plan) != external_schedule(reference):
-                raise ValueError(
-                    "comparison cashflows differ; explicitly disable comparability check to inspect"
-                )
-    return [run_plan(plan, dataset) for plan in plans]
+            if cashflow_contract(plan) != cashflow_contract(reference):
+                raise ValueError("comparison cashflows differ in schedule or effective policy")
+    results = [run_plan(plan, dataset) for plan in plans]
+    if require_same_cashflows:
+        def actual(result):
+            return [(v.date, v.external_flow) for v in result.valuations]
+        if any(actual(r) != actual(results[0]) for r in results[1:]):
+            raise ValueError(
+                "comparison actual cashflows differ; use require_same_cashflows=False "
+                "to inspect path-dependent withdrawals or shortfalls"
+            )
+    return results

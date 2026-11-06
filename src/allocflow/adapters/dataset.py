@@ -1,6 +1,6 @@
 import hashlib
 import json
-from dataclasses import dataclass
+from copy import copy
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
@@ -10,11 +10,7 @@ import pandas as pd
 import pandera.pandas as pa
 
 
-@dataclass(frozen=True)
-class Observation:
-    date: date
-    available_on: date
-    value: Decimal
+from allocflow.domain.market import Observation
 
 
 class DataError(ValueError):
@@ -29,6 +25,23 @@ class MarketDataset:
         self.base_currency = metadata["base_currency"]
         self.dataset_id = metadata["dataset_id"]
         self.max_stale_days = max_stale_days
+
+    def with_staleness_policy(self, max_stale_days):
+        result = copy(self)
+        result.max_stale_days = max_stale_days
+        return result
+
+    def price_observations(self, instrument):
+        return self.prices.get(instrument, ())
+
+    def fx_observations(self, currency):
+        return self.rates.get(currency, ())
+
+    def fx_currencies(self):
+        return tuple(sorted(self.rates))
+
+    def export_artifacts(self):
+        return dict(getattr(self, "artifacts", {}))
 
     def _latest(self, rows, day, *, visible, key):
         found = [r for r in rows if r.date <= day and (not visible or r.available_on <= day)]

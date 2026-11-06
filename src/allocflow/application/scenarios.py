@@ -17,7 +17,7 @@ def scenario_market(plan, market, spec, path_id):
     if spec.shock_date is not None and not plan.start <= spec.shock_date <= plan.end:
         raise ValueError("shock date outside simulation interval")
     ids = [i.id for i in plan.instruments]
-    currencies = sorted(market.rates)
+    currencies = sorted(market.fx_currencies())
     if not set(spec.asset_shocks) <= set(ids) or not set(spec.fx_shocks) <= set(currencies):
         raise ValueError("shock refers to unknown asset/currency")
     if market.base_currency in spec.fx_shocks and spec.fx_shocks[market.base_currency]:
@@ -55,11 +55,11 @@ def scenario_market(plan, market, spec, path_id):
         for i, currency in enumerate(currencies, start=len(ids)):
             matrix[mask, i] *= 1 + float(spec.fx_shocks.get(currency, 0))
     prices = {
-        i: tuple(r for r in market.prices[i] if r.date < plan.start and r.available_on < plan.start)
+        i: tuple(r for r in market.price_observations(i) if r.date < plan.start and r.available_on < plan.start)
         for i in ids
     }
     rates = {
-        c: tuple(r for r in market.rates[c] if r.date < plan.start and r.available_on < plan.start)
+        c: tuple(r for r in market.fx_observations(c) if r.date < plan.start and r.available_on < plan.start)
         for c in currencies
     }
     instrument_specs = {i.id: i for i in plan.instruments}

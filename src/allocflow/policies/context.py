@@ -2,7 +2,9 @@ from collections.abc import Mapping
 from datetime import timedelta
 from types import MappingProxyType
 
-from allocflow.policies.base import PolicyContext
+from allocflow.accounting.planning import reserve_floor
+from allocflow.domain.types import ZERO
+from allocflow.policies.base import BudgetSnapshot, PolicyContext
 
 
 def freeze(value):
@@ -17,7 +19,19 @@ def make_context(book, day, rule_id):
     plan, state = book.plan, book.state
     observed = day - timedelta(days=1)
     total, holding_values, _ = book.value(observed, visible=True)
-    available = {b.id: book.spendable(b.id) for b in plan.budgets}
+    snapshots = {
+        b.id: BudgetSnapshot(
+            balance=state.budgets.get(b.id, ZERO),
+            pending=state.budgets.get(b.id, ZERO) - book.uncommitted(b.id),
+            reserve=reserve_floor(plan, b.id, day, purpose="investment"),
+            spendable=max(
+                book.uncommitted(b.id) - reserve_floor(plan, b.id, day, purpose="investment"),
+                ZERO,
+            ),
+        )
+        for b in plan.budgets
+    }
+    available = {key: snapshot.spendable for key, snapshot in snapshots.items()}
     currencies = {
         plan.report_currency,
         *(i.currency for i in plan.instruments),
@@ -28,6 +42,7 @@ def make_context(book, day, rule_id):
         total_value=total,
         report_currency=plan.report_currency,
         budgets=available,
+        budget_snapshots=snapshots,
         budget_currencies={b.id: b.currency for b in plan.budgets},
         budget_nodes={b.id: b.allocation_node for b in plan.budgets},
         holdings=dict(state.holdings),

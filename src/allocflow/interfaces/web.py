@@ -155,7 +155,7 @@ def main():
             for column, key, label, percent in zip(
                 columns,
                 ["terminal_value", "cash_profit", "twr", "max_drawdown"],
-                ["期末资产", "现金盈亏", "时间加权收益", "日度最大回撤"],
+                ["期末资产", "本窗口盈亏", "本窗口时间加权收益", "本窗口最大回撤"],
                 [False, False, True, True],
                 strict=True,
             ):
@@ -166,6 +166,8 @@ def main():
                     if value is None
                     else (f"{value:.2%}" if percent else f"{value:,.2f} {result.report_currency}"),
                 )
+            with st.expander("指标区间与成立以来结果"):
+                st.json({"window": result.metrics["scope"], "since_inception": result.metrics["since_inception"]})
             st.plotly_chart(wealth_chart(result), width="stretch")
             st.plotly_chart(nav_chart(result), width="stretch")
         compare = st.multiselect(

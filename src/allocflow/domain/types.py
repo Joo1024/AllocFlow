@@ -34,7 +34,16 @@ class TransferIntent:
     reason: str
 
 
-Intent = BuyIntent | SellIntent | TransferIntent
+@dataclass(frozen=True)
+class FundedBuyIntent:
+    rule_id: str
+    instrument: str
+    maximum_report: Decimal
+    cash_budgets: tuple[str, ...]
+    reason: str
+
+
+Intent = BuyIntent | SellIntent | TransferIntent | FundedBuyIntent
 
 
 @dataclass(frozen=True)
@@ -67,6 +76,7 @@ class AccountState:
     latest_inflows: dict[str, dict[str, Decimal]] = field(default_factory=dict)
     external_flows: list[tuple[date, Decimal]] = field(default_factory=list)
     last_date: date | None = None
+    account_contract: dict | None = None
 
     def record(self, day: date, kind: str, rule: str, status: str, **details):
         self.events.append(Event(len(self.events) + 1, day, kind, rule, status, details))  # type: ignore[arg-type]

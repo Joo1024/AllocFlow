@@ -81,14 +81,21 @@ def xirr_metric(flows, end: date, terminal: Decimal, spec):
     )
 
 
-def compute_metrics(valuations, state, spec):
+def compute_metrics(valuations, state, spec, *, initial_state=None):
     if not valuations:
         raise ValueError("no valuation sessions in requested interval")
     returns = standard_returns(valuations, spec.frequency)
     daily = standard_returns(valuations, "daily")
     annualization = float(spec.periods_per_year)
     rf = (1 + float(spec.risk_free_annual)) ** (1 / annualization) - 1
-    total_flow = sum((amount for _, amount in state.external_flows), ZERO)
+    first, end = valuations[0].date, valuations[-1].date
+    window_flows = [(d, a) for d, a in state.external_flows if first <= d <= end]
+    total_flow = sum((amount for _, amount in window_flows), ZERO)
+    opening = valuations[0].value - valuations[0].external_flow
+    opening -= sum(valuations[0].attribution.values(), ZERO)
+    start = initial_state.last_date if initial_state is not None else first
+    window_xirr_flows = ([(start, opening)] if opening else []) + window_flows
+    lifetime_flow = sum((a for _, a in state.external_flows), ZERO)
     value = valuations[-1].value
     # Include the unit-NAV starting point so a first-period loss appears in drawdown.
     wealth = np.r_[1.0, np.cumprod(1 + daily)]
@@ -98,7 +105,7 @@ def compute_metrics(valuations, state, spec):
     result = {
         "terminal_value": metric(value),
         "net_external_flow": metric(total_flow),
-        "cash_profit": metric(value - total_flow),
+        "cash_profit": metric(value - opening - total_flow),
         "twr": metric(np.prod(1 + daily) - 1 if len(daily) else None),
         "max_drawdown": metric(max_dd, frequency="daily"),
         "annual_volatility": metric(
@@ -109,7 +116,15 @@ def compute_metrics(valuations, state, spec):
             if nonzero_vol
             else None
         ),
-        "xirr": xirr_metric(state.external_flows, valuations[-1].date, value, spec),
+        "xirr": xirr_metric(window_xirr_flows, end, value, spec),
+        "scope": {"kind": "run_window", "start": start, "end": end, "opening_value": opening},
+        "since_inception": {
+            "net_external_flow": metric(lifetime_flow),
+            "cash_profit": metric(value - lifetime_flow),
+            "xirr": xirr_metric(state.external_flows, end, value, spec),
+            "start": min((d for d, _ in state.external_flows), default=None),
+            "end": end,
+        },
         "frequency": spec.frequency,
         "periods_per_year": annualization,
         "observations": len(returns),

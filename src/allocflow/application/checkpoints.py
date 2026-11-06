@@ -8,6 +8,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from allocflow.accounting.book import Book
+from allocflow.config.account import account_contract
 from allocflow.domain.types import (
     AccountState,
     BuyIntent,
@@ -19,17 +20,6 @@ from allocflow.domain.types import (
 from allocflow.reporting.projections import json_default
 
 
-def account_contract(plan):
-    raw = plan.model_dump(mode="json") if hasattr(plan, "model_dump") else plan
-    return dict(
-        report_currency=raw["report_currency"],
-        instruments={
-            i["id"]: {k: i[k] for k in ["currency", "quantity_step"]} for i in raw["instruments"]
-        },
-        budgets={b["id"]: b["currency"] for b in raw["budgets"]},
-    )
-
-
 def canonical(value):
     return json.dumps(
         value, default=json_default, ensure_ascii=False, sort_keys=True, separators=(",", ":")
@@ -38,7 +28,7 @@ def canonical(value):
 
 def checkpoint_document(result):
     payload = dict(
-        schema_version="1",
+        schema_version="2",
         account_contract=account_contract(result.manifest["plan"]),
         state=asdict(result.final_state),
     )
@@ -68,7 +58,11 @@ def load_checkpoint(path, plan):
     expected = document.pop("sha256")
     if hashlib.sha256(canonical(document).encode()).hexdigest() != expected:
         raise ValueError("checkpoint integrity mismatch")
-    if document["schema_version"] != "1" or document["account_contract"] != account_contract(plan):
+    if document["schema_version"] != "2":
+        raise ValueError(
+            "legacy checkpoint lacks complete asset identity; regenerate from the original run"
+        )
+    if document["account_contract"] != account_contract(plan):
         raise ValueError("checkpoint account/currency contract mismatch")
     raw = document["state"]
     if set(raw) != {f.name for f in fields(AccountState)}:
@@ -81,6 +75,7 @@ def load_checkpoint(path, plan):
         "balance",
         "gap",
         "liquidity_gap",
+        "unfunded_report",
         "amount",
         "requested",
         "shortfall",
@@ -143,10 +138,13 @@ def load_checkpoint(path, plan):
         latest_inflows={k: money_map(v) for k, v in raw["latest_inflows"].items()},
         external_flows=[(date.fromisoformat(d), decimal(a)) for d, a in raw["external_flows"]],
         last_date=date.fromisoformat(raw["last_date"]) if raw["last_date"] else None,
+        account_contract=raw["account_contract"],
     )
     if not set(state.budgets) <= {b.id for b in plan.budgets} or not set(state.holdings) <= {
         i.id for i in plan.instruments
     }:
         raise ValueError("checkpoint contains unknown budget or instrument")
+    if state.account_contract != document["account_contract"]:
+        raise ValueError("checkpoint state account identity mismatch")
     Book(plan, None, state).assert_invariants()
     return state

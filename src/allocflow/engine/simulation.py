@@ -12,7 +12,13 @@ from allocflow.policies.context import make_context
 
 
 def simulate(plan, market, execution, strategies, *, initial_state=None):
+    from allocflow.config.account import account_contract
+
+    contract = account_contract(plan)
     state = deepcopy(initial_state) if initial_state is not None else AccountState()
+    if initial_state is not None and state.account_contract != contract:
+        raise ValueError("initial state account/asset identity contract mismatch")
+    state.account_contract = contract
     if state.last_date is not None and state.last_date >= plan.start:
         raise ValueError("resumed plan must start strictly after checkpoint date")
     book = Book(plan, market, state)

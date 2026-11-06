@@ -19,7 +19,7 @@ def wealth_chart(result):
         go.Scatter(
             x=values["date"],
             y=values["external_flow"].astype(float).cumsum(),
-            name="净投入",
+            name="本窗口净投入",
             line=dict(color="#819aab", dash="dot"),
         )
     )

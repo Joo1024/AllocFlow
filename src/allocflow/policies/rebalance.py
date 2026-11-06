@@ -1,4 +1,4 @@
-from allocflow.domain.types import ZERO, BuyIntent, SellIntent
+from allocflow.domain.types import ZERO, FundedBuyIntent, SellIntent
 from allocflow.policies.base import Decision
 
 
@@ -7,11 +7,15 @@ def evaluate_rebalance(rule, ctx):
     credits = {i: ZERO for i in members}
     if rule.weight_basis == "budget_inclusive":
         # Protected cash counts toward its allocation node, but is never spent here.
-        for budget, balance in ctx.budgets.items():
+        for budget, snapshot in ctx.budget_snapshots.items():
+            # All cash remains wealth. Only spendable cash from funding budgets is deployed.
+            balance = snapshot.balance
             if budget in rule.cash_budgets:
-                continue
+                balance -= snapshot.spendable
             leaves = ctx.node_targets[ctx.budget_nodes[budget]]
             weight_sum = sum(leaves.values(), ZERO)
+            if weight_sum == 0:
+                continue
             value = balance * ctx.fx_to_report[ctx.budget_currencies[budget]]
             for instrument, weight in leaves.items():
                 if instrument in credits:
@@ -48,15 +52,9 @@ def evaluate_rebalance(rule, ctx):
         deficit = desired[i] - ctx.holding_values.get(i, ZERO)
         if deficit <= rule.minimum_trade:
             continue
-        for budget in rule.cash_budgets:
-            # The last configured budget may receive sale proceeds not yet visible in ctx.
-            currency_rate = ctx.fx_to_report[ctx.budget_currencies[budget]]
-            cap = deficit / currency_rate
-            if budget != rule.proceeds_budget:
-                cap = min(cap, ctx.budgets.get(budget, ZERO))
-            if cap > 0:
-                intents.append(BuyIntent(rule.id, budget, i, cap, "rebalance_underweight"))
-                deficit -= cap * currency_rate
-            if deficit <= 0:
-                break
+        intents.append(
+            FundedBuyIntent(
+                rule.id, i, deficit, rule.cash_budgets, "rebalance_underweight"
+            )
+        )
     return Decision(tuple(intents), f"threshold_exceeded:{dict(drifts)}", {}, {})

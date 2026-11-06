@@ -24,7 +24,11 @@ def trigger(rule, ctx):
         return ZERO, reason + ";already_triggered_this_month", observed, {}
     if spec.rearm == "crossing" and level <= type(level)(ctx.memory.get("observed_level", "0")):
         return ZERO, reason + ";no_new_crossing", observed, {}
-    if spec.rearm == "new_peak" and ctx.memory.get("fired_peak") == str(peak):
+    if (
+        spec.rearm == "new_peak"
+        and "fired_peak" in ctx.memory
+        and peak <= type(peak)(ctx.memory["fired_peak"])
+    ):
         return ZERO, reason + ";waiting_for_new_peak", observed, {}
     return matching[-1].fraction, reason, observed, {"last_month": month, "fired_peak": str(peak)}
 

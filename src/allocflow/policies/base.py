@@ -9,11 +9,20 @@ from allocflow.domain.types import Intent
 
 
 @dataclass(frozen=True)
+class BudgetSnapshot:
+    balance: Decimal
+    pending: Decimal
+    reserve: Decimal
+    spendable: Decimal
+
+
+@dataclass(frozen=True)
 class PolicyContext:
     day: date
     total_value: Decimal
     report_currency: str
     budgets: Mapping[str, Decimal]
+    budget_snapshots: Mapping[str, BudgetSnapshot]
     budget_currencies: Mapping[str, str]
     budget_nodes: Mapping[str, str]
     holdings: Mapping[str, Decimal]

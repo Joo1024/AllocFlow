@@ -121,7 +121,7 @@ def inspect_dataset(plan, market):
             )
         check(
             instrument.id,
-            market.prices.get(instrument.id, ()),
+            market.price_observations(instrument.id),
             lambda d, i=instrument: market.price(i.id, d, visible=i.pricing == "available_nav"),
             mode,
         )
@@ -150,7 +150,7 @@ def inspect_dataset(plan, market):
     for currency in sorted(currencies - {market.base_currency}):
         check(
             f"FX:{currency}",
-            market.rates.get(currency, ()),
+            market.fx_observations(currency),
             lambda d, c=currency: market.fx(c, market.base_currency, d),
             None,
         )
