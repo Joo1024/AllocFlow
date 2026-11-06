@@ -58,6 +58,13 @@ def money_map(value):
 
 def load_checkpoint(path, plan):
     document = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(document, dict) or set(document) != {
+        "schema_version",
+        "account_contract",
+        "state",
+        "sha256",
+    }:
+        raise ValueError("checkpoint document schema mismatch")
     expected = document.pop("sha256")
     if hashlib.sha256(canonical(document).encode()).hexdigest() != expected:
         raise ValueError("checkpoint integrity mismatch")
@@ -67,6 +74,13 @@ def load_checkpoint(path, plan):
     if set(raw) != {f.name for f in fields(AccountState)}:
         raise ValueError("checkpoint state schema mismatch")
     numeric = {
+        "target_report",
+        "value_report",
+        "gap_report",
+        "target",
+        "balance",
+        "gap",
+        "liquidity_gap",
         "amount",
         "requested",
         "shortfall",

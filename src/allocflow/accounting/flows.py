@@ -2,6 +2,7 @@ from copy import deepcopy
 from decimal import Decimal
 
 from allocflow.accounting.book import Book
+from allocflow.accounting.planning import indexed_amount, withdrawal_amount
 from allocflow.adapters.calendar import next_session, sessions
 from allocflow.domain.types import ZERO, SellIntent
 from allocflow.execution.model import ceil_step, floor_step
@@ -23,7 +24,7 @@ def flow_amount(flow, day):
 
 
 def deposit(book, flow, day):
-    amount = flow_amount(flow, day)
+    amount = indexed_amount(book.plan, flow, day, flow_amount(flow, day))
     nav = book.nav(day)
     external = amount * book.fx(flow.money.currency, day)
     if amount == 0:
@@ -60,14 +61,16 @@ def deposit(book, flow, day):
 
 
 def withdraw(book, execution, flow, day):
-    requested = flow_amount(flow, day)
+    requested = indexed_amount(book.plan, flow, day, flow_amount(flow, day))
     policy = book.plan.withdrawal
     if policy is None:
         raise ValueError("withdrawal policy missing")
     if policy.amount_basis == "portfolio_fraction":
         requested = book.value(day)[0] * policy.fraction / book.fx(flow.money.currency, day)
+    requested = withdrawal_amount(book, day, flow.money.currency, requested)
     trial = deepcopy(book.state)
     work = Book(book.plan, book.market, trial)
+    work.current_day = day
     remaining = requested
     paid = ZERO
     costs = ZERO
@@ -76,7 +79,7 @@ def withdraw(book, execution, flow, day):
         nonlocal remaining, paid, costs
         for budget_id in policy.cash_budgets:
             currency = work.budgets[budget_id].currency
-            available = work.spendable(budget_id)
+            available = work.spendable(budget_id, purpose="withdrawal")
             if available <= 0 or remaining <= 0:
                 continue
             rate = work.market.fx(currency, flow.money.currency, day)
@@ -111,13 +114,10 @@ def withdraw(book, execution, flow, day):
         quantity = work.sellable(instrument)
         if quantity <= 0:
             continue
-        price = work.market.price(instrument, day, visible=spec.pricing == "available_nav")
-        needed_native = remaining / work.market.fx(spec.currency, flow.money.currency, day)
-        # Include fees and FX spread. A conservative sale is bounded by actual holdings.
-        fixed = execution.fee(work, needed_native, spec.currency, day)
-        step = spec.quantity_step
-        estimate = ceil_step(
-            (needed_native + fixed) / price / (1 - work.plan.execution.fx_spread), step
+        from allocflow.accounting.liquidation import liquidation_quantity
+
+        estimate = liquidation_quantity(
+            work, execution, instrument, policy.proceeds_budget, flow.money.currency, remaining, day
         )
         intent = SellIntent(
             flow.id,
@@ -136,7 +136,9 @@ def withdraw(book, execution, flow, day):
             "rejected",
             reason="withdrawal_shortfall",
             requested=requested,
-            shortfall=remaining,
+            shortfall=requested,
+            liquidity_gap=remaining,
+            currency=flow.money.currency,
         )
         return ZERO
     external = paid * work.fx(flow.money.currency, day)

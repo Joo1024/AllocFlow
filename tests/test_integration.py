@@ -31,7 +31,7 @@ def test_six_templates_share_one_engine(template, flat_market):
             "1e-12"
         )
         previous = v.value
-    assert result.manifest["engine_semantics"] == "allocflow.daily.v1"
+    assert result.manifest["engine_semantics"] == "allocflow.daily.v2"
 
 
 def test_future_changes_do_not_change_earlier_fills(plan, flat_market):

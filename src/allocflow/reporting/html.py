@@ -8,12 +8,14 @@ TEMPLATE = """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <h1>{{ name }}</h1><p>AllocFlow · 报告币种 {{ currency }} · {{ source }}</p>
 {{ chart | safe }}<h2>指标</h2><table><tr><th>指标</th><th>数值</th><th>状态</th></tr>
 {% for key,m in metrics.items() if m is mapping %}<tr><td>{{ key }}</td><td>{{ m.value }}</td><td>{{ m.status }}</td></tr>{% endfor %}</table>
-<h2>复现信息</h2><p>Dataset {{ dataset }}</p><p>Plan {{ fingerprint }}</p>
+<h2>财富变化来源</h2><pre>{{ bridge }}</pre><h2>复现信息</h2><p>Dataset {{ dataset }}</p><p>Plan {{ fingerprint }}</p>
 <p>事件与逐笔成交见同目录 CSV / Parquet / JSON。费用、FX和舍入已进入结果。</p>
 <details><summary>完整配置</summary><pre>{{ plan }}</pre></details></html>"""
 
 
 def render_report(result):
+    from allocflow.analysis.comparison import wealth_bridge
+
     figure = go.Figure()
     figure.add_trace(
         go.Scatter(
@@ -37,6 +39,7 @@ def render_report(result):
     env = Environment(autoescape=select_autoescape(default=True))
     return env.from_string(TEMPLATE).render(
         name=result.plan_name,
+        bridge=json_text(wealth_bridge(result), indent=2),
         currency=result.report_currency,
         chart=chart,
         metrics=result.metrics,

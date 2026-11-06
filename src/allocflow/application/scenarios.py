@@ -101,13 +101,15 @@ def _run_path(plan, market, spec, path_id, initial_state):
         shortfalls = [
             e
             for e in result.final_state.events
-            if e.kind == "cashflow" and e.details.get("shortfall", 0) > 0
+            if e.kind == "cashflow" and e.details.get("shortfall", 0) > 0 and e.date >= plan.start
         ]
         return {
             "path_id": path_id,
             "status": "ok",
             "terminal_value": str(result.valuations[-1].value),
-            "exhausted": result.valuations[-1].value <= 0 or bool(shortfalls),
+            "exhausted": result.manifest["planning_outcomes"]["first_exhaustion_date"] is not None,
+            "liquidity_shortfall": bool(shortfalls),
+            "planning": result.manifest["planning_outcomes"],
             "dataset_id": generated.dataset_id,
             "metrics": result.metrics,
             "events": [
@@ -142,6 +144,10 @@ def run_scenarios(plan, market, spec, *, initial_state=None):
         "completed": len(completed),
         "failed": spec.paths - len(completed),
         "exhaustion_probability_among_completed": sum(p["exhausted"] for p in completed)
+        / len(completed)
+        if completed
+        else None,
+        "shortfall_probability_among_completed": sum(p["liquidity_shortfall"] for p in completed)
         / len(completed)
         if completed
         else None,

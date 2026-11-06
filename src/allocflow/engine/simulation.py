@@ -2,12 +2,13 @@ from copy import copy, deepcopy
 
 from allocflow.accounting.book import Book
 from allocflow.accounting.flows import accrue_interest, deposit, due, withdraw
+from allocflow.accounting.planning import active, record_planning
 from allocflow.adapters.calendar import month_ends
 from allocflow.analysis.attribution import market_contributions, reconcile
 from allocflow.domain.types import ONE, ZERO, AccountState, Valuation
 from allocflow.engine.scheduler import process_pending, submit, timeline
+from allocflow.policies.composition import evaluate_controlled
 from allocflow.policies.context import make_context
-from allocflow.policies.registry import evaluate_rule
 
 
 def simulate(plan, market, execution, strategies, *, initial_state=None):
@@ -15,6 +16,7 @@ def simulate(plan, market, execution, strategies, *, initial_state=None):
     if state.last_date is not None and state.last_date >= plan.start:
         raise ValueError("resumed plan must start strictly after checkpoint date")
     book = Book(plan, market, state)
+    controls = {c.rule: c for c in plan.controls}
     monthly_days = month_ends(plan.decision_calendar, plan.start, plan.end)
     valuations = []
     previous_value = book.value(state.last_date)[0] if state.last_date else ZERO
@@ -22,7 +24,17 @@ def simulate(plan, market, execution, strategies, *, initial_state=None):
     days = timeline(plan)
     if not days:
         raise ValueError("requested interval has no sessions")
+    goal_days = (
+        {
+            g.id: max((d for d in days if d <= g.date), default=None)
+            for g in plan.planning.goals
+            if plan.start <= g.date <= plan.end
+        }
+        if plan.planning
+        else {}
+    )
     for day in days:
+        book.current_day = day
         before = copy(state)
         before.cash = dict(state.cash)
         before.holdings = dict(state.holdings)
@@ -33,7 +45,9 @@ def simulate(plan, market, execution, strategies, *, initial_state=None):
         monthly = day in monthly_days
         flow_total = ZERO
         for flow in plan.cashflows:
-            if due(flow, day, monthly, plan.decision_calendar):
+            if active(plan, day, flow.id, "cashflows") and due(
+                flow, day, monthly, plan.decision_calendar
+            ):
                 flow_total += (
                     deposit(book, flow, day)
                     if flow.direction == "deposit"
@@ -45,10 +59,10 @@ def simulate(plan, market, execution, strategies, *, initial_state=None):
                 or (rule.schedule == "initial" and before.last_date is None)
                 or (rule.schedule == "monthly" and monthly)
             )
-            if not should_run:
+            if not should_run or not active(plan, day, rule.id, "rules"):
                 continue
             context = make_context(book, day, rule.id)
-            decision = evaluate_rule(rule, context, strategies)
+            decision = evaluate_controlled(rule, context, strategies, controls.get(rule.id))
             memory = state.rule_state.setdefault(rule.id, {})
             memory.update(decision.observed_state)
             book.state.record(
@@ -60,12 +74,15 @@ def simulate(plan, market, execution, strategies, *, initial_state=None):
                 parameters=rule.model_dump(mode="json"),
                 intent_count=len(decision.intents),
                 available_budgets=dict(context.budgets),
+                control=controls[rule.id].model_dump(mode="json") if rule.id in controls else None,
+                budget_priority=list(r.id for r in plan.rules).index(rule.id),
             )
             accepted = False
             for intent in decision.intents:
                 accepted = submit(book, execution, intent, day) or accepted
             if accepted:
                 memory.update(decision.accepted_state)
+        record_planning(book, day, goal_days)
         book.assert_invariants()
         value, holdings, cash = book.value(day)
         nav = value / state.units if state.units > 0 else None
@@ -82,7 +99,22 @@ def simulate(plan, market, execution, strategies, *, initial_state=None):
         attribution = reconcile(contributions, state.events[event_offset:], pnl)
         valuations.append(
             Valuation(
-                day, value, nav, state.units, flow_total, return_, holdings, cash, attribution
+                day,
+                value,
+                nav,
+                state.units,
+                flow_total,
+                return_,
+                holdings,
+                cash,
+                attribution,
+                dict(state.budgets),
+                {b.id: book.spendable(b.id) for b in plan.budgets},
+                {
+                    b.id: state.budgets.get(b.id, ZERO) * book.fx(b.currency, day)
+                    for b in plan.budgets
+                },
+                dict(state.holdings),
             )
         )
         state.last_date = day

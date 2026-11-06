@@ -39,3 +39,5 @@
 skfolio、Optuna、DuckDB为可选研究分组，未作为首版必要功能实现。
 
 见 docs/REVIEW.md 的验证结果与限制；Goal在用户验收前保持打开。
+
+后续六阶段扩展由 [Goal #3](GOAL-SIX-STAGES.md) 单独跟踪；首版的开发分支与不合并 main 的约束继续有效。

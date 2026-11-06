@@ -2,6 +2,7 @@ import hashlib
 import importlib.metadata
 import platform
 import subprocess
+from copy import copy
 from dataclasses import asdict
 from pathlib import Path
 
@@ -40,12 +41,18 @@ def run_plan(plan, dataset, *, strategies=None, execution=None, initial_state=No
         if isinstance(dataset, (str, Path))
         else dataset
     )
-    modes = getattr(market, "metadata", {}).get("instruments", {})
-    for instrument in plan.instruments:
-        if modes.get(instrument.id) != instrument.price_mode:
-            raise ValueError(f"dataset/plan price mode mismatch: {instrument.id}")
-        market.price(instrument.id, plan.start, visible=instrument.pricing == "available_nav")
-        market.price(instrument.id, plan.end, visible=instrument.pricing == "available_nav")
+    market = copy(market)
+    market.max_stale_days = plan.execution.max_stale_days
+    from allocflow.adapters.quality import inspect_dataset
+
+    quality = inspect_dataset(plan, market)
+    if not quality.valid:
+        failures = [
+            f"{i.reference}:{i.code}:{i.first_date}"
+            for i in quality.issues
+            if i.severity == "error"
+        ]
+        raise ValueError("dataset preflight failed: " + "; ".join(failures))
     registry = strategies if strategies is not None else StrategyRegistry()
     for rule in plan.rules:
         if rule.kind == "custom":
@@ -72,10 +79,11 @@ def run_plan(plan, dataset, *, strategies=None, execution=None, initial_state=No
     lock = Path(__file__).resolve().parents[3] / "uv.lock"
     manifest = {
         "schema_version": "1",
-        "engine_semantics": "allocflow.daily.v1",
+        "engine_semantics": "allocflow.daily.v2",
         "plan": plan.model_dump(mode="json"),
         "plan_fingerprint": plan_fingerprint(plan),
         "dataset_id": market.dataset_id,
+        "data_quality": quality.model_dump(mode="json"),
         "dataset_metadata": getattr(market, "metadata", {}),
         "code": code_identity(),
         "python": platform.python_version(),
@@ -97,6 +105,9 @@ def run_plan(plan, dataset, *, strategies=None, execution=None, initial_state=No
         manifest,
     )
 
+    from allocflow.analysis.planning import planning_outcomes
+
+    result.manifest["planning_outcomes"] = planning_outcomes(result)
     result.dataset_artifacts = getattr(market, "artifacts", {})
     result.manifest["dataset_bundled"] = bool(result.dataset_artifacts)
     return result

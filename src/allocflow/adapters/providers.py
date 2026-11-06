@@ -75,6 +75,16 @@ def download_dataset(plan, request, output):
         ),
         reraise=True,
     )
+    currencies = {i.currency for i in plan.instruments} | {b.currency for b in plan.budgets}
+    currencies |= {f.money.currency for f in plan.cashflows} | {
+        plan.report_currency,
+        plan.execution.fee.fixed_currency,
+    }
+    supplied = [f.currency for f in request.fx]
+    if len(supplied) != len(set(supplied)):
+        raise ValueError("duplicate FX source currency")
+    if not (currencies - {request.base_currency}) <= set(supplied):
+        raise ValueError("provider request missing required FX currencies")
     rows = []
     for source in request.prices:
         spec = instruments[source.instrument]
@@ -83,6 +93,7 @@ def download_dataset(plan, request, output):
                 "download adapters do not certify total-return semantics; use provider_adjusted_synthetic"
             )
         pairs = retry(_prices, source, request)
+        pairs = [(day, value) for day, value in pairs if request.start <= day <= request.end]
         if not pairs:
             raise ValueError(f"empty provider response: {source.instrument}")
         for day, price in pairs:

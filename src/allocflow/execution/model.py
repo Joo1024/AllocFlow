@@ -36,16 +36,7 @@ class CashExecution:
         spread = book.plan.execution.fx_spread if spec.currency != budget.currency else ZERO
         before = book.value(day)[0]
         if isinstance(intent, BuyIntent):
-            available = book.state.budgets.get(intent.budget, ZERO)
-            reserved = sum(
-                (
-                    p.intent.maximum_cash
-                    for p in book.state.pending
-                    if isinstance(p.intent, BuyIntent) and p.intent.budget == intent.budget
-                ),
-                ZERO,
-            )
-            cap = min(intent.maximum_cash, available - reserved)
+            cap = min(intent.maximum_cash, book.spendable(intent.budget))
             native_cap = cap * (1 - spread) / rate
             fixed = self.fee(book, ZERO, spec.currency, day)
             proportional = book.plan.execution.fee.proportional

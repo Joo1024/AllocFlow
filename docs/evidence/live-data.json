@@ -1,0 +1,499 @@
+{
+  "verification_date": "2026-11-06",
+  "runs": [
+    {
+      "plan": "用户长期投资计划（真实数据口径）",
+      "sample_start": "2021-01-04",
+      "sample_end": "2023-12-29",
+      "report_currency": "CNY",
+      "dataset_id": "818ee5f7cac29a67fef6e40e7cd17360e40a85517f8f9d9c19f94866055f9f6f",
+      "plan_fingerprint": "808d6b36e66fdf69de2e4da41d6ea408b658f3e0f0fdbbdf15337f6062f0235d",
+      "python_source_sha256": "b9d4073913c13109a8dc4cafde644ca383305920d5de1de8e0e90b395f39e50f",
+      "engine_semantics": "allocflow.daily.v2",
+      "observations": 753,
+      "events": 610,
+      "terminal_value": "520413.4850476033751612364144",
+      "dataset_metadata": {
+        "schema_version": "1",
+        "base_currency": "USD",
+        "source": "retrospective_provider_download",
+        "fetched_at": "2026-11-06T15:37:47.852743+00:00",
+        "availability_basis": "assumed session close / next-session fund publication; retrospective, not certified point-in-time",
+        "instruments": {
+          "VGT": "provider_adjusted_synthetic",
+          "VOO": "provider_adjusted_synthetic",
+          "VTV": "provider_adjusted_synthetic",
+          "VO": "provider_adjusted_synthetic",
+          "VB": "provider_adjusted_synthetic",
+          "VXUS": "provider_adjusted_synthetic",
+          "BND": "provider_adjusted_synthetic",
+          "BNDX": "provider_adjusted_synthetic",
+          "SGOV": "provider_adjusted_synthetic"
+        },
+        "provider_request": {
+          "schema_version": "1",
+          "start": "2020-01-02",
+          "end": "2023-12-29",
+          "base_currency": "USD",
+          "timeout_seconds": "30",
+          "retry_attempts": 3,
+          "retry_wait_seconds": "2",
+          "prices": [
+            {
+              "instrument": "VGT",
+              "provider": "yfinance",
+              "symbol": "VGT",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VOO",
+              "provider": "yfinance",
+              "symbol": "VOO",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VTV",
+              "provider": "yfinance",
+              "symbol": "VTV",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VO",
+              "provider": "yfinance",
+              "symbol": "VO",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VB",
+              "provider": "yfinance",
+              "symbol": "VB",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VXUS",
+              "provider": "yfinance",
+              "symbol": "VXUS",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "BND",
+              "provider": "yfinance",
+              "symbol": "BND",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "BNDX",
+              "provider": "yfinance",
+              "symbol": "BNDX",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "SGOV",
+              "provider": "yfinance",
+              "symbol": "SGOV",
+              "adjustment": "auto_adjust"
+            }
+          ],
+          "fx": [
+            {
+              "currency": "CNY",
+              "symbol": "CNY=X",
+              "invert": true
+            },
+            {
+              "currency": "EUR",
+              "symbol": "EURUSD=X",
+              "invert": false
+            }
+          ]
+        },
+        "notes": "Source adjustment and cumulative NAV are not certified reinvested total returns. AKShare timeout only where source API supports it.",
+        "files": {
+          "prices.csv": "d0072822b68a35b410d1132ea7b0def2d3bc33ea532a3904d57982250b814e8b",
+          "fx.csv": "1d34eb64ced5bc94694723be6e2cb9f6df7c0e352e9b6641e506839f7176ec61"
+        },
+        "dataset_id": "818ee5f7cac29a67fef6e40e7cd17360e40a85517f8f9d9c19f94866055f9f6f"
+      },
+      "quality": {
+        "dataset_id": "818ee5f7cac29a67fef6e40e7cd17360e40a85517f8f9d9c19f94866055f9f6f",
+        "start": "2021-01-04",
+        "end": "2023-12-29",
+        "valid": true,
+        "series": [
+          {
+            "reference": "VGT",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VOO",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VTV",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VO",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VB",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VXUS",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "BND",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "BNDX",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "SGOV",
+            "first_observation": "2020-06-01",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-06-01",
+            "observations": 903,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "FX:CNY",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1042,
+            "maximum_publication_lag_days": 0,
+            "price_mode": null
+          }
+        ],
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "retrospective_adjustment",
+            "reference": "dataset",
+            "first_date": null,
+            "last_date": null,
+            "count": 0,
+            "message": "Provider-adjusted history is retrospective. Assumed publication times and cumulative NAV do not certify point-in-time or reinvested total returns"
+          }
+        ]
+      }
+    },
+    {
+      "plan": "中国股票与基金混合计划（真实数据口径）",
+      "sample_start": "2021-01-04",
+      "sample_end": "2023-12-29",
+      "report_currency": "CNY",
+      "dataset_id": "32b14d80a9674282351b8289875217ba9e5276cc7810e75e9c0ce178a9f9fdf9",
+      "plan_fingerprint": "3a99c2c0071de9a00adb41921829635f25a555d42d96d6f312ce90d0170881bd",
+      "python_source_sha256": "b9d4073913c13109a8dc4cafde644ca383305920d5de1de8e0e90b395f39e50f",
+      "engine_semantics": "allocflow.daily.v2",
+      "observations": 778,
+      "events": 772,
+      "terminal_value": "501718.9559263375525730063509",
+      "dataset_metadata": {
+        "schema_version": "1",
+        "base_currency": "USD",
+        "source": "retrospective_provider_download",
+        "fetched_at": "2026-11-06T15:50:12.748406+00:00",
+        "availability_basis": "assumed session close / next-session fund publication; retrospective, not certified point-in-time",
+        "instruments": {
+          "VGT": "provider_adjusted_synthetic",
+          "VOO": "provider_adjusted_synthetic",
+          "VTV": "provider_adjusted_synthetic",
+          "VO": "provider_adjusted_synthetic",
+          "VB": "provider_adjusted_synthetic",
+          "VXUS": "provider_adjusted_synthetic",
+          "BND": "provider_adjusted_synthetic",
+          "BNDX": "provider_adjusted_synthetic",
+          "SGOV": "provider_adjusted_synthetic",
+          "CN_600519": "provider_adjusted_synthetic",
+          "CN_510300": "provider_adjusted_synthetic",
+          "CN_110022": "provider_adjusted_synthetic"
+        },
+        "provider_request": {
+          "schema_version": "1",
+          "start": "2020-01-02",
+          "end": "2023-12-29",
+          "base_currency": "USD",
+          "timeout_seconds": "30",
+          "retry_attempts": 3,
+          "retry_wait_seconds": "2",
+          "prices": [
+            {
+              "instrument": "VGT",
+              "provider": "yfinance",
+              "symbol": "VGT",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VOO",
+              "provider": "yfinance",
+              "symbol": "VOO",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VTV",
+              "provider": "yfinance",
+              "symbol": "VTV",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VO",
+              "provider": "yfinance",
+              "symbol": "VO",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VB",
+              "provider": "yfinance",
+              "symbol": "VB",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "VXUS",
+              "provider": "yfinance",
+              "symbol": "VXUS",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "BND",
+              "provider": "yfinance",
+              "symbol": "BND",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "BNDX",
+              "provider": "yfinance",
+              "symbol": "BNDX",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "SGOV",
+              "provider": "yfinance",
+              "symbol": "SGOV",
+              "adjustment": "auto_adjust"
+            },
+            {
+              "instrument": "CN_600519",
+              "provider": "akshare_equity",
+              "symbol": "600519",
+              "adjustment": "hfq"
+            },
+            {
+              "instrument": "CN_510300",
+              "provider": "akshare_etf",
+              "symbol": "510300",
+              "adjustment": "hfq"
+            },
+            {
+              "instrument": "CN_110022",
+              "provider": "akshare_fund",
+              "symbol": "110022",
+              "adjustment": "cumulative_nav"
+            }
+          ],
+          "fx": [
+            {
+              "currency": "CNY",
+              "symbol": "CNY=X",
+              "invert": true
+            },
+            {
+              "currency": "EUR",
+              "symbol": "EURUSD=X",
+              "invert": false
+            }
+          ]
+        },
+        "notes": "Source adjustment and cumulative NAV are not certified reinvested total returns. AKShare timeout only where source API supports it.",
+        "files": {
+          "prices.csv": "a4114043d3e22b466b9291fb6ccb9e627710ea12fadffd67bade8aeae8e4e673",
+          "fx.csv": "1d34eb64ced5bc94694723be6e2cb9f6df7c0e352e9b6641e506839f7176ec61"
+        },
+        "dataset_id": "32b14d80a9674282351b8289875217ba9e5276cc7810e75e9c0ce178a9f9fdf9"
+      },
+      "quality": {
+        "dataset_id": "32b14d80a9674282351b8289875217ba9e5276cc7810e75e9c0ce178a9f9fdf9",
+        "start": "2021-01-04",
+        "end": "2023-12-29",
+        "valid": true,
+        "series": [
+          {
+            "reference": "VGT",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VOO",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VTV",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VO",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VB",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "VXUS",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "BND",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "BNDX",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1006,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "SGOV",
+            "first_observation": "2020-06-01",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-06-01",
+            "observations": 903,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "CN_600519",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 970,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "CN_510300",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 970,
+            "maximum_publication_lag_days": 0,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "CN_110022",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-03",
+            "observations": 971,
+            "maximum_publication_lag_days": 11,
+            "price_mode": "provider_adjusted_synthetic"
+          },
+          {
+            "reference": "FX:CNY",
+            "first_observation": "2020-01-02",
+            "last_observation": "2023-12-29",
+            "first_available": "2020-01-02",
+            "observations": 1042,
+            "maximum_publication_lag_days": 0,
+            "price_mode": null
+          }
+        ],
+        "issues": [
+          {
+            "severity": "warning",
+            "code": "retrospective_adjustment",
+            "reference": "dataset",
+            "first_date": null,
+            "last_date": null,
+            "count": 0,
+            "message": "Provider-adjusted history is retrospective. Assumed publication times and cumulative NAV do not certify point-in-time or reinvested total returns"
+          }
+        ]
+      }
+    }
+  ]
+}

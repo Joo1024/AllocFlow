@@ -24,8 +24,16 @@ def _mapping(loader, node, deep=False):
 UniqueKeyLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, _mapping)
 
 
+def read_document(text: str):
+    try:
+        document = yaml.load(text, Loader=UniqueKeyLoader)
+    except (yaml.YAMLError, TypeError) as exc:
+        raise ValueError(f"invalid YAML: {exc}") from exc
+    return document
+
+
 def parse_plan(text: str) -> PlanSpec:
-    return PlanSpec.model_validate(yaml.load(text, Loader=UniqueKeyLoader))
+    return PlanSpec.model_validate(read_document(text))
 
 
 def load_plan(path: str | Path) -> PlanSpec:
@@ -35,3 +43,7 @@ def load_plan(path: str | Path) -> PlanSpec:
 def plan_fingerprint(plan: PlanSpec) -> str:
     canonical = json.dumps(plan.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def dump_plan(plan: PlanSpec) -> str:
+    return yaml.safe_dump(plan.model_dump(mode="json"), allow_unicode=True, sort_keys=False)

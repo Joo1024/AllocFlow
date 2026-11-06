@@ -2,7 +2,6 @@ from collections.abc import Mapping
 from datetime import timedelta
 from types import MappingProxyType
 
-from allocflow.domain.types import ZERO, BuyIntent
 from allocflow.policies.base import PolicyContext
 
 
@@ -18,11 +17,7 @@ def make_context(book, day, rule_id):
     plan, state = book.plan, book.state
     observed = day - timedelta(days=1)
     total, holding_values, _ = book.value(observed, visible=True)
-    available = dict(state.budgets)
-    for pending in state.pending:
-        if isinstance(pending.intent, BuyIntent):
-            i = pending.intent
-            available[i.budget] = available.get(i.budget, ZERO) - i.maximum_cash
+    available = {b.id: book.spendable(b.id) for b in plan.budgets}
     currencies = {
         plan.report_currency,
         *(i.currency for i in plan.instruments),

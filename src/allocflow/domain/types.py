@@ -83,6 +83,10 @@ class Valuation:
     holdings_value: dict[str, Decimal]
     cash_value: Decimal
     attribution: dict[str, Decimal]
+    budget_balances: dict[str, Decimal]
+    budget_spendable: dict[str, Decimal]
+    budget_values: dict[str, Decimal]
+    quantities: dict[str, Decimal]
 
 
 @dataclass

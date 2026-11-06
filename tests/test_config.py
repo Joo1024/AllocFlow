@@ -8,7 +8,7 @@ from allocflow.config.plan import PlanSpec
 
 
 def test_all_named_plans_validate():
-    for path in Path("examples").glob("*.yaml"):
+    for path in [*Path("examples").glob("*.yaml"), *Path("examples/plans").glob("*.yaml")]:
         if path.stem not in {"demo_data", "scenarios", "stress", "providers"}:
             load_plan(path)
 

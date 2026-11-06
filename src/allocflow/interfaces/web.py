@@ -14,19 +14,24 @@ from allocflow.reporting.projections import json_text, tables
 
 
 def show_error(exc):
-    st.error(str(exc))
+    from allocflow.application.errors import error_document
+
+    st.error(error_document(exc))
 
 
 def plan_files():
     folder = Path(__file__).resolve().parents[3] / "examples"
     return [
         p
-        for p in sorted(folder.glob("*.yaml"))
+        for p in sorted([*folder.glob("*.yaml"), *(folder / "plans").glob("*.yaml")])
         if p.stem not in {"demo_data", "scenarios", "stress", "providers"}
     ]
 
 
 def main():
+    if "pending_plan_yaml" in st.session_state:
+        st.session_state["plan_yaml"] = st.session_state.pop("pending_plan_yaml")
+        st.session_state.pop("plan_editor", None)
     st.set_page_config(page_title="AllocFlow · 投资计划实验室", page_icon="◈", layout="wide")
     st.markdown(
         """<style>.block-container{padding-top:2rem;max-width:1500px}h1{letter-spacing:-.04em}div[data-testid=stMetric]{background:#f1f7f5;padding:18px;border-radius:10px}section[data-testid=stSidebar]{background:#edf4f1}</style>""",
@@ -55,7 +60,9 @@ def main():
         st.info("阈值、金额、预算、执行顺序和费用都来自计划 YAML。未填写必填字段会直接报错。")
         st.caption("这是本地研究模拟器。合成数据仅供功能演示。")
 
-    tabs = st.tabs(["01 计划", "02 数据", "03 运行与比较", "04 事件解释", "05 情景与导出"])
+    tabs = st.tabs(
+        ["01 计划", "02 数据", "03 运行与比较", "04 事件解释", "05 情景与导出", "06 计划库"]
+    )
     plan = None
     with tabs[0]:
         st.subheader("计划规格")
@@ -68,6 +75,9 @@ def main():
         if text.strip():
             try:
                 plan = parse_plan(text)
+                from allocflow.interfaces.web_editor import render_editor
+
+                render_editor(plan)
                 st.success(
                     f"配置有效 · {plan.name} · {len(plan.instruments)} 个资产 · {len(plan.rules)} 条有序规则"
                 )
@@ -101,7 +111,9 @@ def main():
                 market = MarketDataset.load(
                     st.session_state.dataset_path, max_stale_days=plan.execution.max_stale_days
                 )
-                st.json(market.metadata)
+                from allocflow.adapters.quality import inspect_dataset
+
+                st.json(inspect_dataset(plan, market).model_dump(mode="json"))
             except (ValueError, OSError) as exc:
                 show_error(exc)
         st.markdown("**生成离线演示数据**")
@@ -179,6 +191,13 @@ def main():
                     ),
                     hide_index=True,
                 )
+                from allocflow.analysis.comparison import compare_results
+
+                for other in compared[1:]:
+                    with st.expander(
+                        f"事件与财富差异：{compared[0].plan_name} → {other.plan_name}"
+                    ):
+                        st.json(compare_results(compared[0], other))
             except (ValueError, OSError, ArithmeticError) as exc:
                 show_error(exc)
 
@@ -194,8 +213,14 @@ def main():
                 sequence = st.selectbox("查看事件证据", event_table["sequence"].tolist())
                 event = next(e for e in result.final_state.events if e.sequence == sequence)
                 st.code(json_text(asdict(event), indent=2), language="json")
-            with st.expander("逐日归因"):
-                st.dataframe(tables(result)["attribution"], hide_index=True)
+            for name, label in [
+                ("attribution", "逐日归因"),
+                ("budgets", "预算余额与可用资金"),
+                ("drift", "持仓权重与目标偏离"),
+                ("non_trades", "未交易与拒绝原因"),
+            ]:
+                with st.expander(label):
+                    st.dataframe(tables(result)[name], hide_index=True)
         else:
             st.info("运行计划后，可查看规则参数、触发理由、预算、成交和拒绝原因。")
 
@@ -226,6 +251,9 @@ def main():
                 )
             except (ValueError, OSError, ArithmeticError, ImportError) as exc:
                 show_error(exc)
+        from allocflow.interfaces.web_forecast import render_forecast
+
+        render_forecast(plan, files, scenario_text)
         if result:
             st.text_input("导出到新目录", key="export_path")
             if st.button("导出运行包", disabled=not st.session_state.get("export_path")):
@@ -234,6 +262,11 @@ def main():
                     st.success("已导出 HTML、CSV、Parquet、配置与运行信息。")
                 except (ValueError, OSError) as exc:
                     show_error(exc)
+
+    with tabs[5]:
+        from allocflow.interfaces.web_library import render_library
+
+        render_library(text)
 
 
 if __name__ == "__main__":

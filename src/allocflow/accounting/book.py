@@ -8,6 +8,7 @@ class Book:
         self.plan = plan
         self.market = market
         self.state = state
+        self.current_day = state.last_date
         self.budgets = {b.id: b for b in plan.budgets}
         self.instruments = {i.id: i for i in plan.instruments}
 
@@ -19,7 +20,7 @@ class Book:
         self.state.budgets[budget] = balance
         self.state.cash[currency] = self.state.cash.get(currency, ZERO) + delta
 
-    def spendable(self, budget):
+    def uncommitted(self, budget):
         reserved = sum(
             (
                 p.intent.maximum_cash
@@ -29,6 +30,12 @@ class Book:
             ZERO,
         )
         return self.state.budgets.get(budget, ZERO) - reserved
+
+    def spendable(self, budget, *, purpose="investment"):
+        from allocflow.accounting.planning import reserve_floor
+
+        floor = reserve_floor(self.plan, budget, self.current_day, purpose=purpose)
+        return max(self.uncommitted(budget) - floor, ZERO)
 
     def value(self, day, *, visible=False):
         holdings = {
@@ -80,7 +87,7 @@ class Book:
     def assert_invariants(self):
         if any(self.sellable(i) < 0 for i in self.state.holdings):
             raise ArithmeticError("pending sells exceed inventory")
-        if any(self.spendable(b.id) < 0 for b in self.plan.budgets):
+        if any(self.uncommitted(b.id) < 0 for b in self.plan.budgets):
             raise ArithmeticError("pending orders exceed available budget")
         for currency, actual in self.state.cash.items():
             assigned = sum(

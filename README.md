@@ -2,7 +2,7 @@
 
 面向长期投资的现金流与资产配置模拟器。Python 包：`allocflow`。
 
-首版开发分支：`dev/allocflow-v0.1`。以投资计划为中心，六个 YAML 模板共用一个日级引擎。
+开发分支：`dev/allocflow-v0.1`。以投资计划为中心，六个 YAML 模板共用一个日级引擎。
 用户金额、阈值、预算、资产、费用、时间与规则顺序全部显式配置；缺项和未知字段报错。
 
 ## 本地运行
@@ -18,7 +18,7 @@ uv run allocflow web
 ```
 
 输出目录必须是新目录。演示数据是合成数据，不是历史行情。
-Web 中选择模板并载入，填写数据集目录后运行；可以编辑全部 YAML、比较计划、查看逐笔事件和导出结果。
+Web 中选择模板并载入，填写数据集目录后运行；支持资金表单、资产树和规则编辑、完整 YAML、计划版本/复制、运行历史、检查点续跑、配对比较及事件解释。
 
 ## 模板与扩展
 
@@ -54,8 +54,9 @@ uv run allocflow scenarios --plan examples/user_plan.yaml --dataset work/demo-ma
 SDK传入内存数据对象时，导出包明确标记是否包含快照。原始金额JSON保留精确Decimal文本，Parquet报告投影保留18位小数。
 
 可选行情入口：`uv sync --locked --extra web --extra scenarios --extra providers --group dev`，
-然后执行 `uv run allocflow download --plan examples/user_plan.yaml --request examples/providers.yaml --output work/history`。
-联网入口是可替换适配器；当前验证以离线契约为主，不保证第三方接口持续可用。
+然后执行 `uv run allocflow download --plan examples/plans/user_live.yaml --request examples/providers.yaml --output work/history`。
+中国扩展使用 `examples/plans/china_live.yaml` 与 `examples/data/china_providers.yaml`。真实数据与演示数据价格口径不同，必须使用对应计划。
+2026-11-06 已实测美股/中国股票/场内基金/场外基金接口，并用 2021–2023 年真实快照跑通两份计划；证据见 [数据验证](docs/LIVE-DATA-VALIDATION.md)。第三方接口后续仍可能变化。
 SGOV历史始于其上市后，真实数据的训练区间须覆盖全部资产，不能使用演示数据的虚构历史替代。
 
 ## 验证与边界
@@ -91,3 +92,14 @@ SDK：`from allocflow.application.checkpoints import load_checkpoint`，然后�
 
 完整开发测试环境包含providers：
 `uv sync --locked --extra web --extra scenarios --extra providers --group dev`。
+
+## 六阶段扩展
+
+新示例采用 schema v2，旧 v1 可读取并显式迁移。所有新增业务能力都要显式填写；兼容值集中在 `config/evolution.py`。
+
+- [配置契约与组合规则](docs/CONFIGURATION.md)：版本、preset、统一错误、AND/OR、冷却、次数、排名及预算边界。
+- [本地计划与比较流程](docs/WORKFLOWS.md)：版本、历史、续跑、逐日预算/偏离、财富归因和事件差异。
+- [长期规划](docs/PLANNING.md)：阶段、通胀、提款边界、应急储备、目标与同路径账户继承。
+- [六阶段 Goal 与验收](docs/GOAL-SIX-STAGES.md)。
+
+组合规则示例 `examples/plans/composed.yaml`，长期规划示例 `examples/plans/lifecycle.yaml`，集中 preset `examples/presets/catalog.yaml`。

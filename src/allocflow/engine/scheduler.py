@@ -1,7 +1,7 @@
 from dataclasses import replace
 
 from allocflow.adapters.calendar import next_session, sessions
-from allocflow.domain.types import ZERO, BuyIntent, PendingIntent, SellIntent, TransferIntent
+from allocflow.domain.types import BuyIntent, PendingIntent, SellIntent, TransferIntent
 
 
 def submit(book, execution, intent, day):
@@ -12,15 +12,7 @@ def submit(book, execution, intent, day):
     if due == day:
         return execution.execute(book, intent, day)
     if isinstance(intent, BuyIntent):
-        reserved = sum(
-            (
-                p.intent.maximum_cash
-                for p in book.state.pending
-                if isinstance(p.intent, BuyIntent) and p.intent.budget == intent.budget
-            ),
-            ZERO,
-        )
-        available = book.state.budgets.get(intent.budget, ZERO) - reserved
+        available = book.spendable(intent.budget)
         cap = min(intent.maximum_cash, available)
         if cap <= 0:
             book.state.record(

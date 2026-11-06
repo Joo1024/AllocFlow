@@ -3,9 +3,8 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-import yaml
-from pydantic import ValidationError
 
+from allocflow.application.errors import error_document
 from allocflow.config.loader import load_plan, plan_fingerprint
 from allocflow.config.plan import PlanSpec
 from allocflow.reporting.projections import json_text
@@ -19,24 +18,16 @@ def errors(function):
         try:
             return function(*args, **kwargs)
         except (ValueError, OSError, ArithmeticError, ImportError) as exc:
-            details = (
-                exc.errors(include_url=False, include_context=False)
-                if isinstance(exc, ValidationError)
-                else str(exc)
-            )
-            typer.echo(
-                json_text({"status": "error", "type": type(exc).__name__, "details": details}),
-                err=True,
-            )
+            typer.echo(json_text(error_document(exc)), err=True)
             raise typer.Exit(code=2) from exc
 
     return wrapped
 
 
 def read_spec(path, model):
-    from allocflow.config.loader import UniqueKeyLoader
+    from allocflow.config.loader import read_document
 
-    return model.model_validate(yaml.load(path.read_text(encoding="utf-8"), Loader=UniqueKeyLoader))
+    return model.model_validate(read_document(path.read_text(encoding="utf-8")))
 
 
 @app.command()
@@ -102,12 +93,14 @@ def compare(
     from allocflow.application.service import compare_plans
 
     results = compare_plans([load_plan(p) for p in plans], dataset)
+    from allocflow.analysis.comparison import compare_results
+
     output.write_text(
         json_text(
-            [
-                {"plan": r.plan_name, "metrics": r.metrics, "dataset_id": r.dataset_id}
-                for r in results
-            ],
+            {
+                "plans": [{"plan": r.plan_name, "metrics": r.metrics} for r in results],
+                "comparisons": [compare_results(results[0], r) for r in results[1:]],
+            },
             indent=2,
         ),
         encoding="utf-8",
@@ -179,3 +172,67 @@ def resume(
     result = run_plan(spec, dataset, initial_state=load_checkpoint(checkpoint, spec))
     export_run(result, output, html=html)
     typer.echo(json_text({"status": "complete", "output": str(output), "metrics": result.metrics}))
+
+
+@app.command()
+@errors
+def migrate(
+    plan: Annotated[Path, typer.Option(exists=True)],
+    output: Annotated[Path, typer.Option()],
+    target_version: Annotated[str, typer.Option()],
+):
+    from allocflow.config.evolution import migrate_document
+    from allocflow.config.loader import dump_plan, read_document
+
+    raw = read_document(plan.read_text(encoding="utf-8"))
+    resolved = PlanSpec.model_validate(migrate_document(raw, target_version=target_version))
+    with output.open("x", encoding="utf-8") as stream:
+        stream.write(dump_plan(resolved))
+    typer.echo(str(output))
+
+
+@app.command()
+@errors
+def materialize(
+    catalog: Annotated[Path, typer.Option(exists=True)],
+    name: Annotated[str, typer.Option()],
+    output: Annotated[Path, typer.Option()],
+):
+    from allocflow.config.loader import dump_plan
+    from allocflow.config.presets import PresetCatalog
+
+    plan = read_spec(catalog, PresetCatalog).resolve(name)
+    with output.open("x", encoding="utf-8") as stream:
+        stream.write(dump_plan(plan))
+    typer.echo(
+        json_text({"preset": name, "fingerprint": plan_fingerprint(plan), "output": str(output)})
+    )
+
+
+@app.command("data-quality")
+@errors
+def data_quality(
+    plan: Annotated[Path, typer.Option(exists=True)],
+    dataset: Annotated[Path, typer.Option(exists=True)],
+    output: Annotated[Path, typer.Option()],
+):
+    from allocflow.adapters.dataset import MarketDataset
+    from allocflow.adapters.quality import inspect_dataset
+
+    spec = load_plan(plan)
+    report = inspect_dataset(
+        spec, MarketDataset.load(dataset, max_stale_days=spec.execution.max_stale_days)
+    )
+    output.write_text(json_text(report.model_dump(mode="json"), indent=2), encoding="utf-8")
+    typer.echo(json_text({"valid": report.valid, "output": str(output)}))
+    if not report.valid:
+        raise typer.Exit(2)
+
+
+from allocflow.interfaces.library_cli import register  # noqa: E402
+
+register(app, errors)
+
+from allocflow.interfaces.forecast_cli import register as register_forecast  # noqa: E402
+
+register_forecast(app, errors, read_spec)

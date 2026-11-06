@@ -1,0 +1,63 @@
+schema_version: '1'
+start: '2020-01-02'
+end: '2023-12-29'
+base_currency: USD
+timeout_seconds: '30'
+retry_attempts: 3
+retry_wait_seconds: '2'
+prices:
+- instrument: VGT
+  provider: yfinance
+  symbol: VGT
+  adjustment: auto_adjust
+- instrument: VOO
+  provider: yfinance
+  symbol: VOO
+  adjustment: auto_adjust
+- instrument: VTV
+  provider: yfinance
+  symbol: VTV
+  adjustment: auto_adjust
+- instrument: VO
+  provider: yfinance
+  symbol: VO
+  adjustment: auto_adjust
+- instrument: VB
+  provider: yfinance
+  symbol: VB
+  adjustment: auto_adjust
+- instrument: VXUS
+  provider: yfinance
+  symbol: VXUS
+  adjustment: auto_adjust
+- instrument: BND
+  provider: yfinance
+  symbol: BND
+  adjustment: auto_adjust
+- instrument: BNDX
+  provider: yfinance
+  symbol: BNDX
+  adjustment: auto_adjust
+- instrument: SGOV
+  provider: yfinance
+  symbol: SGOV
+  adjustment: auto_adjust
+- instrument: CN_600519
+  provider: akshare_equity
+  symbol: '600519'
+  adjustment: hfq
+- instrument: CN_510300
+  provider: akshare_etf
+  symbol: '510300'
+  adjustment: hfq
+- instrument: CN_110022
+  provider: akshare_fund
+  symbol: '110022'
+  adjustment: cumulative_nav
+fx:
+- currency: CNY
+  symbol: CNY=X
+  invert: true
+- currency: EUR
+  symbol: EURUSD=X
+  invert: false

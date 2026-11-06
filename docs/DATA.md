@@ -19,3 +19,9 @@ AKShare 基金累计净值入口保留这个限制，下载记录会明确写入
 中国股票与基金的symbol、calendar、quantity_step、pricing、execution_delay_sessions均可配置。
 非交易日的投资意图排队，买单锁定预算、卖单锁定持仓。
 场外基金的确认延迟为研究近似，不支持以延迟资产立即满足当天提款。
+
+## 全区间检查
+
+`allocflow data-quality` 和 `run_plan` 共用检查器：按实际日历检查行情、前一日可见决策价格与所需 FX，输出缺口起止、次数、首末观测、最早可用日和最大发布滞后。SDK 传入 MarketDataset 时仍使用计划的陈旧阈值，不让数据对象隐藏覆盖它。
+
+已完成真实数据端到端验证，见 [实测证据](LIVE-DATA-VALIDATION.md)。

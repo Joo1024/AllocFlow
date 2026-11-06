@@ -1,11 +1,14 @@
 from datetime import date
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from allocflow.config.assets import AllocationNode, BudgetSpec, GroupSpec, InstrumentSpec
 from allocflow.config.cashflows import CashflowSpec, WithdrawalSpec
 from allocflow.config.common import Currency, NonNegative, Number, Positive, Spec
+from allocflow.config.composition import RuleControl
+from allocflow.config.evolution import V1_COMPATIBILITY
+from allocflow.config.planning import PlanningSpec
 from allocflow.config.rules import BudgetCapRule, CustomRule, InvestRule, RebalanceRule, RuleSpec
 
 
@@ -37,7 +40,20 @@ class AnalysisSpec(Spec):
 
 
 class PlanSpec(Spec):
-    schema_version: Literal["1"]
+    model_config = ConfigDict(
+        json_schema_extra={
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {"schema_version": {"const": "2"}},
+                        "required": ["schema_version"],
+                    },
+                    "then": {"required": ["controls", "planning"]},
+                }
+            ]
+        }
+    )
+    schema_version: Literal["1", "2"]
     name: str = Field(min_length=1)
     start: date
     end: date
@@ -52,6 +68,26 @@ class PlanSpec(Spec):
     withdrawal: WithdrawalSpec | None
     execution: ExecutionSpec
     analysis: AnalysisSpec
+
+    controls: tuple[RuleControl, ...] = Field(
+        default_factory=lambda: tuple(V1_COMPATIBILITY["controls"])
+    )
+    planning: PlanningSpec | None = Field(default_factory=lambda: V1_COMPATIBILITY["planning"])
+
+    @model_validator(mode="before")
+    @classmethod
+    def version_contract(cls, data):
+        if isinstance(data, dict) and data.get("schema_version") == "2":
+            missing = set(V1_COMPATIBILITY) - data.keys()
+            if missing:
+                raise ValueError(f"schema v2 requires explicit fields: {sorted(missing)}")
+        if (
+            isinstance(data, dict)
+            and data.get("schema_version") == "1"
+            and (data.get("controls") or data.get("planning") is not None)
+        ):
+            raise ValueError("composition and planning require explicit migration to schema v2")
+        return data
 
     @model_validator(mode="after")
     def business_contract(self):
@@ -137,4 +173,7 @@ class PlanSpec(Spec):
                 raise ValueError("unknown withdrawal budget")
             if not set(w.sell_order) <= instruments:
                 raise ValueError("withdrawal sell_order must contain instrument ids")
+        from allocflow.config.references import validate_extensions
+
+        validate_extensions(self)
         return self

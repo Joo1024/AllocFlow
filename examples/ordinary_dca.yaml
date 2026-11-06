@@ -1,5 +1,5 @@
 # Explicit named configuration; edit values here, not in the engine.
-schema_version: '1'
+schema_version: '2'
 name: 普通定投
 start: '2021-01-04'
 end: '2023-12-29'
@@ -221,8 +221,8 @@ cashflows:
     weight: '0.16'
 rules:
 - id: initial_stocks
-  kind: invest
   schedule: initial
+  kind: invest
   source_budget: stock_dca
   trigger:
     kind: always
@@ -234,8 +234,8 @@ rules:
     fraction: '1'
     minimum_budget: '0'
 - id: initial_bonds
-  kind: invest
   schedule: initial
+  kind: invest
   source_budget: bonds
   trigger:
     kind: always
@@ -247,8 +247,8 @@ rules:
     fraction: '1'
     minimum_budget: '0'
 - id: initial_sgov
-  kind: invest
   schedule: initial
+  kind: invest
   source_budget: cash_equiv
   trigger:
     kind: always
@@ -260,8 +260,8 @@ rules:
     fraction: '1'
     minimum_budget: '0'
 - id: monthly_stocks
-  kind: invest
   schedule: monthly
+  kind: invest
   source_budget: stock_dca
   trigger:
     kind: always
@@ -273,8 +273,8 @@ rules:
     fraction: '1'
     minimum_budget: '0'
 - id: monthly_bonds
-  kind: invest
   schedule: monthly
+  kind: invest
   source_budget: bonds
   trigger:
     kind: always
@@ -286,8 +286,8 @@ rules:
     fraction: '1'
     minimum_budget: '0'
 - id: monthly_sgov
-  kind: invest
   schedule: monthly
+  kind: invest
   source_budget: cash_equiv
   trigger:
     kind: always
@@ -317,5 +317,7 @@ analysis:
   xirr_upper: '10'
   xirr_grid_size: 500
   xirr_day_count: ACT/365F
-  xirr_root_tolerance: '0.0000001'
-  xirr_npv_tolerance: '0.0000001'
+  xirr_root_tolerance: 1E-7
+  xirr_npv_tolerance: 1E-7
+controls: []
+planning: null
