@@ -1,11 +1,5 @@
 name: review-replay
-on:
-  push:
-    branches: [dev/allocflow-v0.1]
-    paths:
-      - 'src/**'
-      - 'scripts/review_replay.py'
-      - '.github/workflows/review-replay.yml'
+on: workflow_dispatch
 permissions:
   contents: read
 jobs:

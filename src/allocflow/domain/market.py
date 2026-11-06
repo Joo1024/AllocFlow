@@ -13,9 +13,14 @@ class Observation:
 
 
 class MarketData(Protocol):
-    dataset_id: str
-    base_currency: str
-    metadata: Mapping[str, Any]
+    @property
+    def dataset_id(self) -> str: ...
+
+    @property
+    def base_currency(self) -> str: ...
+
+    @property
+    def metadata(self) -> Mapping[str, Any]: ...
 
     def with_staleness_policy(self, max_stale_days: int) -> "MarketData": ...
 

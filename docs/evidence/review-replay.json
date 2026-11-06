@@ -1,0 +1,170 @@
+{
+  "workflow_run": "https://github.com/Joo1024/AllocFlow/actions/runs/42255791637",
+  "tested_commit": "c93cff5b24cdf8c1bfd29ed166f2a65b2b2dab42",
+  "baseline_commit": "98532a48047362bd6aaa41a3f62214359c561151",
+  "runs": [
+    {
+      "plan": "user",
+      "status": "ok",
+      "baseline": {
+        "dataset_id": "8075c8014cca05cf7b61ebba3e088488cadc6cae7e8513bfccbc3c4d40c937c0",
+        "code": {
+          "commit": "98532a48047362bd6aaa41a3f62214359c561151",
+          "python_source_sha256": "7943ba5c91d637d49a9ea93d9f22efeb8e771ade6352fcbc4f2ba1f07606a015"
+        },
+        "terminal_value": "520255.5581565110282936638626",
+        "report_currency": "CNY",
+        "events": 610,
+        "quality_valid": true,
+        "metrics": {
+          "terminal_value": {
+            "value": 520255.55815651105,
+            "status": "ok"
+          },
+          "net_external_flow": {
+            "value": 450000,
+            "status": "ok"
+          },
+          "cash_profit": {
+            "value": 70255.55815651103,
+            "status": "ok"
+          },
+          "twr": {
+            "value": 0.222173093310704,
+            "status": "ok"
+          },
+          "max_drawdown": {
+            "value": -0.11459313316569619,
+            "status": "ok",
+            "frequency": "daily"
+          },
+          "annual_volatility": {
+            "value": 0.09767897670099739,
+            "status": "ok"
+          },
+          "sharpe": {
+            "value": 0.7339037062608414,
+            "status": "ok"
+          },
+          "xirr": {
+            "value": 0.0838122199490256,
+            "status": "ok",
+            "roots": [
+              0.0838122199490256
+            ],
+            "npv_residual": 2.220446049250313e-16,
+            "search_domain": [
+              -0.999,
+              10
+            ],
+            "uniqueness_proven": true,
+            "search_note": "grid/sign-change search does not prove all roots were found"
+          },
+          "frequency": "monthly",
+          "periods_per_year": 12,
+          "observations": 36,
+          "partial_periods_included": true
+        }
+      },
+      "fixed": {
+        "dataset_id": "8075c8014cca05cf7b61ebba3e088488cadc6cae7e8513bfccbc3c4d40c937c0",
+        "code": {
+          "commit": "c93cff5b24cdf8c1bfd29ed166f2a65b2b2dab42",
+          "python_source_sha256": "42dac38c930e587c0a063a4b676238f0e4bbc79301bb326f86a27c9cf7345d1a"
+        },
+        "terminal_value": "520255.5581565110282936638626",
+        "report_currency": "CNY",
+        "events": 610,
+        "quality_valid": true,
+        "metrics": {
+          "terminal_value": {
+            "value": 520255.55815651105,
+            "status": "ok"
+          },
+          "net_external_flow": {
+            "value": 450000,
+            "status": "ok"
+          },
+          "cash_profit": {
+            "value": 70255.55815651103,
+            "status": "ok"
+          },
+          "twr": {
+            "value": 0.222173093310704,
+            "status": "ok"
+          },
+          "max_drawdown": {
+            "value": -0.11459313316569619,
+            "status": "ok",
+            "frequency": "daily"
+          },
+          "annual_volatility": {
+            "value": 0.09767897670099739,
+            "status": "ok"
+          },
+          "sharpe": {
+            "value": 0.7339037062608414,
+            "status": "ok"
+          },
+          "xirr": {
+            "value": 0.0838122199490256,
+            "status": "ok",
+            "roots": [
+              0.0838122199490256
+            ],
+            "npv_residual": 2.220446049250313e-16,
+            "search_domain": [
+              -0.999,
+              10
+            ],
+            "uniqueness_proven": true,
+            "search_note": "grid/sign-change search does not prove all roots were found"
+          },
+          "scope": {
+            "kind": "run_window",
+            "start": "2021-01-04",
+            "end": "2023-12-29",
+            "opening_value": "0E-26"
+          },
+          "since_inception": {
+            "net_external_flow": {
+              "value": 450000,
+              "status": "ok"
+            },
+            "cash_profit": {
+              "value": 70255.55815651103,
+              "status": "ok"
+            },
+            "xirr": {
+              "value": 0.0838122199490256,
+              "status": "ok",
+              "roots": [
+                0.0838122199490256
+              ],
+              "npv_residual": 2.220446049250313e-16,
+              "search_domain": [
+                -0.999,
+                10
+              ],
+              "uniqueness_proven": true,
+              "search_note": "grid/sign-change search does not prove all roots were found"
+            },
+            "start": "2021-01-04",
+            "end": "2023-12-29"
+          },
+          "frequency": "monthly",
+          "periods_per_year": 12,
+          "observations": 36,
+          "partial_periods_included": true
+        }
+      },
+      "repeat_identical": true
+    },
+    {
+      "plan": "china",
+      "status": "error",
+      "error_type": "CalledProcessError",
+      "error": "Command '['/home/runner/work/AllocFlow/AllocFlow/.venv/bin/python', '/home/runner/work/AllocFlow/AllocFlow/scripts/review_replay.py', 'child', 'download', '/home/runner/work/AllocFlow/AllocFlow/examples/plans/china_live.yaml', '/home/runner/work/AllocFlow/AllocFlow/work/review-evidence/china-data', '/home/runner/work/AllocFlow/AllocFlow/examples/data/china_providers.yaml']' returned non-zero exit status 1."
+    }
+  ]
+}

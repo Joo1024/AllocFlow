@@ -103,3 +103,7 @@ SDK：`from allocflow.application.checkpoints import load_checkpoint`，然后�
 - [六阶段 Goal 与验收](docs/GOAL-SIX-STAGES.md)。
 
 组合规则示例 `examples/plans/composed.yaml`，长期规划示例 `examples/plans/lifecycle.yaml`，集中 preset `examples/presets/catalog.yaml`。
+
+## 财务逻辑 Review 修复
+
+预算快照、再平衡资金分配、检查点身份、严格现金流比较和续跑指标范围已修复。详见 [修复说明与验证证据](docs/REVIEW-FIXES.md)。检查点升级为 v2；旧 v1 文件需用原计划与固定快照重新生成。网络验证与离线代码检查分别记录。

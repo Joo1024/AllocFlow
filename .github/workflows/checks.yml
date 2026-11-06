@@ -18,6 +18,12 @@ jobs:
         if: always()
       - run: uv run pytest
         if: always()
+      - name: Build and isolated wheel smoke test
+        run: |
+          uv build
+          uv venv work/wheel-smoke
+          uv pip install --python work/wheel-smoke/bin/python dist/*.whl
+          work/wheel-smoke/bin/allocflow validate --plan examples/plans/lifecycle.yaml
       - name: Formatting diagnostics
         if: failure()
         run: |
