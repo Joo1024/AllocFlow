@@ -31,8 +31,12 @@ def submit(book, execution, intent, day):
                 break
         if remaining > 0:
             book.state.record(
-                day, "funding", intent.rule_id, "info",
-                instrument=intent.instrument, unfunded_report=remaining,
+                day,
+                "funding",
+                intent.rule_id,
+                "info",
+                instrument=intent.instrument,
+                unfunded_report=remaining,
                 reason="funding_shortfall_or_execution_rounding",
             )
         return accepted

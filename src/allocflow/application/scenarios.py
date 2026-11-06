@@ -55,11 +55,19 @@ def scenario_market(plan, market, spec, path_id):
         for i, currency in enumerate(currencies, start=len(ids)):
             matrix[mask, i] *= 1 + float(spec.fx_shocks.get(currency, 0))
     prices = {
-        i: tuple(r for r in market.price_observations(i) if r.date < plan.start and r.available_on < plan.start)
+        i: tuple(
+            r
+            for r in market.price_observations(i)
+            if r.date < plan.start and r.available_on < plan.start
+        )
         for i in ids
     }
     rates = {
-        c: tuple(r for r in market.fx_observations(c) if r.date < plan.start and r.available_on < plan.start)
+        c: tuple(
+            r
+            for r in market.fx_observations(c)
+            if r.date < plan.start and r.available_on < plan.start
+        )
         for c in currencies
     }
     instrument_specs = {i.id: i for i in plan.instruments}

@@ -129,8 +129,10 @@ def compare_plans(plans, dataset, *, require_same_cashflows=True):
                 raise ValueError("comparison cashflows differ in schedule or effective policy")
     results = [run_plan(plan, dataset) for plan in plans]
     if require_same_cashflows:
+
         def actual(result):
             return [(v.date, v.external_flow) for v in result.valuations]
+
         if any(actual(r) != actual(results[0]) for r in results[1:]):
             raise ValueError(
                 "comparison actual cashflows differ; use require_same_cashflows=False "

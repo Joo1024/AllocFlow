@@ -31,7 +31,10 @@ def render_report(result):
         flows.append(cumulative)
     figure.add_trace(
         go.Scatter(
-            x=[v.date for v in result.valuations], y=flows, name="本窗口净投入", line=dict(dash="dot")
+            x=[v.date for v in result.valuations],
+            y=flows,
+            name="本窗口净投入",
+            line=dict(dash="dot"),
         )
     )
     figure.update_layout(template="plotly_white", yaxis_title=result.report_currency)

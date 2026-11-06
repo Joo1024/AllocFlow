@@ -167,7 +167,12 @@ def main():
                     else (f"{value:.2%}" if percent else f"{value:,.2f} {result.report_currency}"),
                 )
             with st.expander("指标区间与成立以来结果"):
-                st.json({"window": result.metrics["scope"], "since_inception": result.metrics["since_inception"]})
+                st.json(
+                    {
+                        "window": result.metrics["scope"],
+                        "since_inception": result.metrics["since_inception"],
+                    }
+                )
             st.plotly_chart(wealth_chart(result), width="stretch")
             st.plotly_chart(nav_chart(result), width="stretch")
         compare = st.multiselect(

@@ -3,10 +3,19 @@ def account_contract(plan):
     return dict(
         report_currency=raw["report_currency"],
         instruments={
-            i["id"]: {k: i[k] for k in [
-                "symbol", "kind", "currency", "calendar",
-                "price_mode", "pricing", "quantity_step",
-            ]} for i in raw["instruments"]
+            i["id"]: {
+                k: i[k]
+                for k in [
+                    "symbol",
+                    "kind",
+                    "currency",
+                    "calendar",
+                    "price_mode",
+                    "pricing",
+                    "quantity_step",
+                ]
+            }
+            for i in raw["instruments"]
         },
         budgets={b["id"]: b["currency"] for b in raw["budgets"]},
     )

@@ -53,8 +53,6 @@ def evaluate_rebalance(rule, ctx):
         if deficit <= rule.minimum_trade:
             continue
         intents.append(
-            FundedBuyIntent(
-                rule.id, i, deficit, rule.cash_budgets, "rebalance_underweight"
-            )
+            FundedBuyIntent(rule.id, i, deficit, rule.cash_budgets, "rebalance_underweight")
         )
     return Decision(tuple(intents), f"threshold_exceeded:{dict(drifts)}", {}, {})

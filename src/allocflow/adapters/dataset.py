@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 import pandera.pandas as pa
 
-
 from allocflow.domain.market import Observation
 
 
